@@ -1,7 +1,7 @@
 `default_nettype none
 
 module tt_um_space_invader_vga(
-  input  wire [3:0] ui_in,    // Dedicated inputs for player controls
+  input  wire [7:0] ui_in,    // Dedicated inputs for player controls
   output wire [7:0] uo_out,   // Dedicated outputs
   input  wire [7:0] uio_in,   // IOs: Input path
   output wire [7:0] uio_out,  // IOs: Output path
@@ -44,7 +44,7 @@ assign uio_out = 0;
 assign uio_oe  = 0;
 
 // Suppress unused signals warning
-wire _unused_ok = &{ena, uio_in};
+wire _unused_ok = &{ena, uio_in, ui_in[7:4]};
 
 // Player control signals
 // ui_in[0]: Move right
