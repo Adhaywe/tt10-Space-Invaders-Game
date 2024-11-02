@@ -1,3 +1,6 @@
+`default_nettype none
+`timescale 1ns / 1ps
+
 ///////////////
 module hvsync_generator(
     input  wire clk,          // Pixel clock (25 MHz for 640x480 @ 60Hz)
