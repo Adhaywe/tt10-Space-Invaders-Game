@@ -1,4 +1,5 @@
 `default_nettype none
+`timescale 1ns / 1ps
 
 module tt_um_space_invader_vga(
   input  wire [7:0] ui_in,    // Dedicated inputs for player controls
