@@ -9,11 +9,11 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-Explain how your project works
+A simple space invaders game in verilog. Use inputs 0 and 1 to move the player to the right and to the left respectively. To shoot at the aliens, press button 2.
 
 ## How to test
 
-Explain how to use your project
+Set the inputs and check the outputs.
 
 ## External hardware
 
