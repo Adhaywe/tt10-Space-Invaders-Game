@@ -434,8 +434,9 @@ reg [9:0] alien_x, alien_y;
 reg [9:0] sprite_x, sprite_y;
 
 always @* begin
-  integer row = 0;
-  integer col = 0;
+  integer row, col;
+  row = 0;
+  col = 0;
   // Default assignments
   alien_pixel = 0;
   alien_color = 3'b000;
@@ -552,8 +553,10 @@ end
 wire fire_button_rising_edge = ui_in[2] && !prev_fire_button;
 
 always @(posedge clk or negedge rst_n) begin
-  integer row = 0;
-  integer col = 0;
+  integer row, col;
+  row = 0;
+  col = 0;
+  
   if (!rst_n || ui_in[3] || game_over_flag || game_won_flag) begin
     // Reset shooter and bullet variables
     shooter_x <= 253;
