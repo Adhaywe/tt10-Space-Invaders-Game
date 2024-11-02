@@ -77,7 +77,7 @@ reg alien_health [0:NUM_ROWS-1][0:NUM_COLUMNS-1];  // 1-bit wide
 
 // Integers for loop counters
 integer i, j;
-integer row, col;
+//integer row, col;
 
 // Declare a counter for remaining aliens
 reg [6:0] aliens_remaining; // Enough bits to count up to 55 (NUM_ROWS * NUM_COLUMNS)
@@ -433,6 +433,7 @@ reg [9:0] alien_x, alien_y;
 reg [9:0] sprite_x, sprite_y;
 
 always @* begin
+  integer row, col;
   // Default assignments
   alien_pixel = 0;
   alien_color = 3'b000;
@@ -549,6 +550,7 @@ end
 wire fire_button_rising_edge = ui_in[2] && !prev_fire_button;
 
 always @(posedge clk or negedge rst_n) begin
+  integer row, col;
   if (!rst_n || ui_in[3] || game_over_flag || game_won_flag) begin
     // Reset shooter and bullet variables
     shooter_x <= 253;
