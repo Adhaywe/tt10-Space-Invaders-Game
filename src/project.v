@@ -479,7 +479,7 @@ always @* begin
           end else if (row == 3 || row == 4) begin
             sprite_x = (pix_x - alien_x) / 2;  // Smaller large sprite (10x10 pixels)
             sprite_y = (pix_y - alien_y) / 2;
-            if (pix_x >= alien_x && pix_x < alien_x + 20 &&
+                if (pix_x >= alien_x && pix_x < alien_x + 20 &&
                 pix_y >= alien_y && pix_y < alien_y + 20 &&
                 sprite_x < 10 && sprite_y < 10 &&
                 small_large_alien_sprite[sprite_y][sprite_x]) begin
