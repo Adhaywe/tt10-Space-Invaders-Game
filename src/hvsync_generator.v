@@ -1,88 +1,69 @@
-`default_nettype none
-`timescale 1ns / 1ps
+`ifndef HVSYNC_GENERATOR_H
+`define HVSYNC_GENERATOR_H
 
-///////////////
-module hvsync_generator(
-    input  wire clk,          // Pixel clock (25 MHz for 640x480 @ 60Hz)
-    input  wire reset,        // Active high reset
-    output reg  hsync,        // Horizontal sync signal
-    output reg  vsync,        // Vertical sync signal
-    output wire display_on,   // High when display is active
-    output wire [9:0] hpos,   // Current pixel x position
-    output wire [9:0] vpos    // Current pixel y position
-);
+/*
+Video sync generator, used to drive a VGA monitor.
+Timing from: https://en.wikipedia.org/wiki/Video_Graphics_Array
+To use:
+- Wire the hsync and vsync signals to top level outputs
+- Add a 3-bit (or more) "rgb" output to the top level
+*/
 
-    // VGA 640x480 @ 60Hz Timing Parameters
-    localparam H_DISPLAY       = 640;
-    localparam H_FRONT_PORCH   = 16;
-    localparam H_SYNC_PULSE    = 96;
-    localparam H_BACK_PORCH    = 48;
-    localparam H_TOTAL         = H_DISPLAY + H_FRONT_PORCH + H_SYNC_PULSE + H_BACK_PORCH;
+module hvsync_generator(clk, reset, hsync, vsync, display_on, hpos, vpos);
 
-    localparam V_DISPLAY       = 480;
-    localparam V_FRONT_PORCH   = 10;
-    localparam V_SYNC_PULSE    = 2;
-    localparam V_BACK_PORCH    = 33;
-    localparam V_TOTAL         = V_DISPLAY + V_FRONT_PORCH + V_SYNC_PULSE + V_BACK_PORCH;
+  input clk;
+  input reset;
+  output reg hsync, vsync;
+  output display_on;
+  output reg [9:0] hpos;
+  output reg [9:0] vpos;
 
-    reg [9:0] h_count = 0;
-    reg [9:0] v_count = 0;
+  // declarations for TV-simulator sync parameters
+  // horizontal constants
+  parameter H_DISPLAY       = 640; // horizontal display width
+  parameter H_BACK          =  48; // horizontal left border (back porch)
+  parameter H_FRONT         =  16; // horizontal right border (front porch)
+  parameter H_SYNC          =  96; // horizontal sync width
+  // vertical constants
+  parameter V_DISPLAY       = 480; // vertical display height
+  parameter V_TOP           =  33; // vertical top border
+  parameter V_BOTTOM        =  10; // vertical bottom border
+  parameter V_SYNC          =   2; // vertical sync # lines
+  // derived constants
+  parameter H_SYNC_START    = H_DISPLAY + H_FRONT;
+  parameter H_SYNC_END      = H_DISPLAY + H_FRONT + H_SYNC - 1;
+  parameter H_MAX           = H_DISPLAY + H_BACK + H_FRONT + H_SYNC - 1;
+  parameter V_SYNC_START    = V_DISPLAY + V_BOTTOM;
+  parameter V_SYNC_END      = V_DISPLAY + V_BOTTOM + V_SYNC - 1;
+  parameter V_MAX           = V_DISPLAY + V_TOP + V_BOTTOM + V_SYNC - 1;
 
-    // Horizontal Counter
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
-            h_count <= 0;
-        end else begin
-            if (h_count == H_TOTAL - 1)
-                h_count <= 0;
-            else
-                h_count <= h_count + 1;
-        end
-    end
+  wire hmaxxed = (hpos == H_MAX) || reset;	// set when hpos is maximum
+  wire vmaxxed = (vpos == V_MAX) || reset;	// set when vpos is maximum
+  
+  // horizontal position counter
+  always @(posedge clk)
+  begin
+    hsync <= (hpos>=H_SYNC_START && hpos<=H_SYNC_END);
+    if(hmaxxed)
+      hpos <= 0;
+    else
+      hpos <= hpos + 1;
+  end
 
-    // Vertical Counter
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
-            v_count <= 0;
-        end else begin
-            if (h_count == H_TOTAL - 1) begin
-                if (v_count == V_TOTAL - 1)
-                    v_count <= 0;
-                else
-                    v_count <= v_count + 1;
-            end
-        end
-    end
-
-    // Generate HSYNC
-    always @(posedge clk or posedge reset) begin
-        if (reset)
-            hsync <= 1;
-        else
-            if (h_count >= (H_DISPLAY + H_FRONT_PORCH) && h_count < (H_DISPLAY + H_FRONT_PORCH + H_SYNC_PULSE))
-                hsync <= 0;  // Active low
-            else
-                hsync <= 1;
-    end
-
-    // Generate VSYNC
-    always @(posedge clk or posedge reset) begin
-        if (reset)
-            vsync <= 1;
-        else
-            if (v_count >= (V_DISPLAY + V_FRONT_PORCH) && v_count < (V_DISPLAY + V_FRONT_PORCH + V_SYNC_PULSE))
-                vsync <= 0;  // Active low
-            else
-                vsync <= 1;
-    end
-
-    // Display Active Signal
-    assign display_on = (h_count < H_DISPLAY) && (v_count < V_DISPLAY);
-
-    // Current Pixel Position
-    assign hpos = h_count;
-    assign vpos = v_count;
+  // vertical position counter
+  always @(posedge clk)
+  begin
+    vsync <= (vpos>=V_SYNC_START && vpos<=V_SYNC_END);
+    if(hmaxxed)
+      if (vmaxxed)
+        vpos <= 0;
+      else
+        vpos <= vpos + 1;
+  end
+  
+  // display_on is set when beam is in "safe" visible frame
+  assign display_on = (hpos<H_DISPLAY) && (vpos<V_DISPLAY);
 
 endmodule
 
-//////////////
+`endif
