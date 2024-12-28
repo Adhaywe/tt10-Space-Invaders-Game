@@ -1,7 +1,6 @@
 `default_nettype none
-`timescale 1ns / 1ps
 
-module tt_um_space_invader_vga(
+module tt_um_vga_example(
   input  wire [7:0] ui_in,    // Dedicated inputs for player controls
   output wire [7:0] uo_out,   // Dedicated outputs
   input  wire [7:0] uio_in,   // IOs: Input path
@@ -11,7 +10,6 @@ module tt_um_space_invader_vga(
   input  wire       clk,      // Clock
   input  wire       rst_n     // Reset_n - low to reset
 );
-
 
 // State Definitions using localparam
 localparam [1:0] 
@@ -44,6 +42,8 @@ assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
 assign uio_out = 0;
 assign uio_oe  = 0;
 
+
+
 // Suppress unused signals warning
 wire _unused_ok = &{ena, uio_in, ui_in[7:4]};
 
@@ -56,8 +56,8 @@ wire _unused_ok = &{ena, uio_in, ui_in[7:4]};
 // Define screen and shooter dimensions
 localparam SCREEN_WIDTH    = 640;  // VGA standard width
 localparam SHOOTER_WIDTH    = 12;  // Shooter sprite actual width based on drawing logic
-localparam SHOOTER_MIN_X    = 0;    // Minimum x position
-localparam SHOOTER_MAX_X    = SCREEN_WIDTH - SHOOTER_WIDTH - 1; // 640 - 12 -1 = 627
+localparam SHOOTER_MIN_X    = 10;    // Minimum x position
+localparam SHOOTER_MAX_X    = SCREEN_WIDTH - SHOOTER_WIDTH - 100; // 640 - 12 -1 = 627
 
 // Alien movement parameters
 reg [9:0] alien_offset_x;  // Horizontal offset for alien movement
@@ -78,7 +78,8 @@ reg alien_health [0:NUM_ROWS-1][0:NUM_COLUMNS-1];  // 1-bit wide
 
 // Integers for loop counters
 integer i, j;
-//integer row, col;
+integer row, col;
+integer i_temp;
 
 // Declare a counter for remaining aliens
 reg [6:0] aliens_remaining; // Enough bits to count up to 55 (NUM_ROWS * NUM_COLUMNS)
@@ -88,7 +89,6 @@ reg [1:0] player_health; // 2-bit to hold values up to 3
 reg [3:0] digit_health;
 localparam HEALTH_DIGIT_X = 450; // Position for health digit
 localparam HEALTH_DIGIT_Y = 20;  // Same Y position as score digits
-
 
 // VGA signal generation
 hvsync_generator hvsync_gen(
@@ -234,7 +234,7 @@ localparam BULLET_HEIGHT = 8;
 
 // ----- Barrier Definitions Start -----
 // Define barrier parameters
-localparam NUM_BARRIERS = 4;
+//localparam NUM_BARRIERS = 4;
 localparam BARRIER_WIDTH = 60;
 localparam BARRIER_HEIGHT = 30;
 
@@ -369,8 +369,10 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 // Implement the spawn_alien_bullet task
+//integer col, row, 
+
 task spawn_alien_bullet;
-  integer col, row, i_temp;
+  
   begin
     // Choose a random column
     col = lfsr[3:0] % NUM_COLUMNS;
@@ -434,9 +436,7 @@ reg [9:0] alien_x, alien_y;
 reg [9:0] sprite_x, sprite_y;
 
 always @* begin
-  integer row, col;
-  row = 0;
-  col = 0;
+  
   // Default assignments
   alien_pixel = 0;
   alien_color = 3'b000;
@@ -479,7 +479,7 @@ always @* begin
           end else if (row == 3 || row == 4) begin
             sprite_x = (pix_x - alien_x) / 2;  // Smaller large sprite (10x10 pixels)
             sprite_y = (pix_y - alien_y) / 2;
-                if (pix_x >= alien_x && pix_x < alien_x + 20 &&
+            if (pix_x >= alien_x && pix_x < alien_x + 20 &&
                 pix_y >= alien_y && pix_y < alien_y + 20 &&
                 sprite_x < 10 && sprite_y < 10 &&
                 small_large_alien_sprite[sprite_y][sprite_x]) begin
@@ -553,10 +553,6 @@ end
 wire fire_button_rising_edge = ui_in[2] && !prev_fire_button;
 
 always @(posedge clk or negedge rst_n) begin
-  integer row, col;
-  row = 0;
-  col = 0;
-  
   if (!rst_n || ui_in[3] || game_over_flag || game_won_flag) begin
     // Reset shooter and bullet variables
     shooter_x <= 253;
@@ -919,8 +915,7 @@ always @* begin
     end
   end
 
-  // Trophy rendering (only in GAME_WON state)
-  if (current_state == GAME_WON) begin
+  // Trophy rendering 
     if (pix_x >= TROPHY_X && pix_x < TROPHY_X + TROPHY_WIDTH &&
         pix_y >= TROPHY_Y && pix_y < TROPHY_Y + TROPHY_HEIGHT) begin
       // Calculate the sprite's relative x and y positions
@@ -931,7 +926,7 @@ always @* begin
       if (trophy_sprite[trophy_sprite_y][trophy_sprite_x])
         trophy_pixel = 1;
     end
-  end
+  
 
   // ----- Barrier Rendering Start -----
   // Initialize barrier_pixel
