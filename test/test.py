@@ -56,7 +56,8 @@ async def test_reset(dut):
 
     # Use a faster clock: let's do 1 MHz for example (period = 1us)
     # For a true VGA simulation, consider ~25 MHz.
-    clock = Clock(dut.clk, 1, units="us")  
+    # 25 MHz clock => 40 ns period
+    clock = Clock(dut.clk, 40, units="ns")
     cocotb.start_soon(clock.start())
 
     # Initially drive signals
