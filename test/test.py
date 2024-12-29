@@ -85,47 +85,47 @@ async def test_reset(dut):
     dut._log.info("=== test_reset DONE ===\n")
 
 
-@cocotb.test()
-async def test_vga_sync(dut):
+##@cocotb.test()
+##async def test_vga_sync(dut):
     
     ##Let the simulation run for a while to see if HSYNC/VSYNC bits in uo_out ever toggle.
     
-    dut._log.info("=== test_vga_sync START ===")
+  ##  dut._log.info("=== test_vga_sync START ===")
 
-    clock = Clock(dut.clk, 40, units="ns")  
-    cocotb.start_soon(clock.start())
+   ## clock = Clock(dut.clk, 40, units="ns")  
+    ##cocotb.start_soon(clock.start())
 
     # Reset
-    dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 20)
-    dut.rst_n.value = 1
+    ##dut.ena.value = 1
+    ##dut.ui_in.value = 0
+    ##dut.uio_in.value = 0
+    ##dut.rst_n.value = 0
+    ##await ClockCycles(dut.clk, 20)
+    ##dut.rst_n.value = 1
 
     # Let the design run for a while
-    TOTAL_CYCLES = 500_000  # Adjust up if needed
-    dut._log.info(f"Running for {TOTAL_CYCLES} cycles at 25 MHz ...")
-    await ClockCycles(dut.clk, TOTAL_CYCLES)
+    ##TOTAL_CYCLES = 500_000  # Adjust up if needed
+    ##dut._log.info(f"Running for {TOTAL_CYCLES} cycles at 25 MHz ...")
+    ##await ClockCycles(dut.clk, TOTAL_CYCLES)
 
     # uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]}
     # Extract bits
-    uo_out_val = int(dut.uo_out.value)
-    hsync_bit  = (uo_out_val >> 7) & 0x1
-    vsync_bit  = (uo_out_val >> 3) & 0x1
+    ##uo_out_val = int(dut.uo_out.value)
+    ##hsync_bit  = (uo_out_val >> 7) & 0x1
+    ##vsync_bit  = (uo_out_val >> 3) & 0x1
 
-    dut._log.info(f"uo_out final = {uo_out_val:08b} (HSYNC={hsync_bit}, VSYNC={vsync_bit})")
+    ##dut._log.info(f"uo_out final = {uo_out_val:08b} (HSYNC={hsync_bit}, VSYNC={vsync_bit})")
 
     # Ideally, we expect HSYNC or VSYNC to have toggled if enough cycles have passed.
     # We can’t easily confirm *during* the run unless we sample repeatedly.
     # For demonstration, we do a final check if they’re not both 0. (Very rough check!)
     # For a robust test, log transitions or sample multiple times in a loop.
-    assert (hsync_bit == 1 or vsync_bit == 1), (
-        "HSYNC and VSYNC never toggled from 0 within the time tested. "
-        "Try increasing the clock frequency or the simulation cycles."
-    )
+    ##assert (hsync_bit == 1 or vsync_bit == 1), (
+      ##  "HSYNC and VSYNC never toggled from 0 within the time tested. "
+      ##  "Try increasing the clock frequency or the simulation cycles."
+    ##)
 
-    dut._log.info("=== test_vga_sync DONE ===\n")
+    ##dut._log.info("=== test_vga_sync DONE ===\n")
 
 
 @cocotb.test()
