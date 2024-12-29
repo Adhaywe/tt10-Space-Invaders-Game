@@ -452,6 +452,8 @@ always @* begin
   alien_y = 0;
   sprite_x = 0;
   sprite_y = 0;
+  row_tmp1 = 0;
+  col_tmp1 = 0;
 
 
   // Loop over each row and column of aliens
