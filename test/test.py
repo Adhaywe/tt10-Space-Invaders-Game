@@ -105,7 +105,7 @@ async def test_vga_sync(dut):
 
     # Let the design run for a while
     TOTAL_CYCLES = 500_000  # Adjust up if needed
-    dut._log.info(f"Running for {TOTAL_CYCLES} cycles at 1 MHz ...")
+    dut._log.info(f"Running for {TOTAL_CYCLES} cycles at 25 MHz ...")
     await ClockCycles(dut.clk, TOTAL_CYCLES)
 
     # uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]}
