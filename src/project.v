@@ -1,7 +1,8 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-module tt_um_space_invader_vga(
+
+module tt_um_space_invader_vga (
   input  wire [7:0] ui_in,    // Dedicated inputs for player controls
   output wire [7:0] uo_out,   // Dedicated outputs
   input  wire [7:0] uio_in,   // IOs: Input path
@@ -104,107 +105,104 @@ hvsync_generator hvsync_gen(
 
 // Alien sprite definitions
 // Small Alien (Top Row)
-reg [7:0] small_alien_sprite [0:7];
-initial begin
-  small_alien_sprite[0] = 8'b00011000;
-  small_alien_sprite[1] = 8'b00111100;
-  small_alien_sprite[2] = 8'b01111110;
-  small_alien_sprite[3] = 8'b11011011;
-  small_alien_sprite[4] = 8'b11111111;
-  small_alien_sprite[5] = 8'b00100100;
-  small_alien_sprite[6] = 8'b01000010;
-  small_alien_sprite[7] = 8'b10000001;
-end
+localparam [7:0] small_alien_sprite [0:7] = '{
+    8'b00011000,
+    8'b00111100,
+    8'b01111110,
+    8'b11011011,
+    8'b11111111,
+    8'b00100100,
+    8'b01000010,
+    8'b10000001
+};
 
 // Distinct Alien Shape (2nd and 3rd Rows)
-reg [11:0] distinct_alien_sprite [0:11];
-initial begin
-  distinct_alien_sprite[0]  = 12'b000011100000;
-  distinct_alien_sprite[1]  = 12'b000111110000;
-  distinct_alien_sprite[2]  = 12'b001111111000;
-  distinct_alien_sprite[3]  = 12'b011011101100;
-  distinct_alien_sprite[4]  = 12'b111111111110;
-  distinct_alien_sprite[5]  = 12'b101111111010;
-  distinct_alien_sprite[6]  = 12'b101001100010;
-  distinct_alien_sprite[7]  = 12'b101000000010;
-  distinct_alien_sprite[8]  = 12'b001100110000;
-  distinct_alien_sprite[9]  = 12'b010000001000;
-  distinct_alien_sprite[10] = 12'b100000000100;
-  distinct_alien_sprite[11] = 12'b000000000000;
-end
 
-// Smaller Large Alien (4th and 5th Rows)
-reg [9:0] small_large_alien_sprite [0:9];
-initial begin
-  small_large_alien_sprite[0] = 10'b0011111100;
-  small_large_alien_sprite[1] = 10'b0111111110;
-  small_large_alien_sprite[2] = 10'b1101101101;
-  small_large_alien_sprite[3] = 10'b1111111111;
-  small_large_alien_sprite[4] = 10'b0111111110;
-  small_large_alien_sprite[5] = 10'b0010010010;
-  small_large_alien_sprite[6] = 10'b0100000100;
-  small_large_alien_sprite[7] = 10'b1000000010;
-  small_large_alien_sprite[8] = 10'b1100000110;
-  small_large_alien_sprite[9] = 10'b0111111110;
-end
+localparam [11:0] distinct_alien_sprite [0:11] = '{
+    12'b000011100000,
+    12'b000111110000,
+    12'b001111111000,
+    12'b011011101100,
+    12'b111111111110,
+    12'b101111111010,
+    12'b101001100010,
+    12'b101000000010,
+    12'b001100110000,
+    12'b010000001000,
+    12'b100000000100,
+    12'b000000000000
+};
+
+
+localparam [9:0] small_large_alien_sprite [0:9] = '{
+  10'b0011111100,
+  10'b0111111110,
+  10'b1101101101,
+  10'b1111111111,
+  10'b0111111110,
+  10'b0010010010,
+  10'b0100000100,
+  10'b1000000010,
+  10'b1100000110,
+  10'b0111111110
+};
+
 
 // 7-segment display font for digits 0-9
-reg [6:0] digit_segments [0:9];
 reg [3:0] digit0, digit1, digit2;
-initial begin
-  digit_segments[0] = 7'b0111111;  // 0
-  digit_segments[1] = 7'b0000110;  // 1
-  digit_segments[2] = 7'b1011011;  // 2
-  digit_segments[3] = 7'b1001111;  // 3
-  digit_segments[4] = 7'b1100110;  // 4
-  digit_segments[5] = 7'b1101101;  // 5
-  digit_segments[6] = 7'b1111101;  // 6
-  digit_segments[7] = 7'b0000111;  // 7
-  digit_segments[8] = 7'b1111111;  // 8
-  digit_segments[9] = 7'b1101111;  // 9
-end
+localparam [6:0] digit_segments [0:9] = '{
+    7'b0111111,  // 0
+    7'b0000110,  // 1
+    7'b1011011,  // 2
+    7'b1001111,  // 3
+    7'b1100110,  // 4
+    7'b1101101,  // 5
+    7'b1111101,  // 6
+    7'b0000111,  // 7
+    7'b1111111,  // 8
+    7'b1101111   // 9
+};
 
 // 16x16 Heart sprite
-reg [15:0] heart_sprite [0:15];
-initial begin
-  heart_sprite[0]  = 16'b0000000000000000;
-  heart_sprite[1]  = 16'b0000000000000000;
-  heart_sprite[2]  = 16'b0001110001110000;
-  heart_sprite[3]  = 16'b0011111011111000;
-  heart_sprite[4]  = 16'b0011111111111000;
-  heart_sprite[5]  = 16'b0011111111111000;
-  heart_sprite[6]  = 16'b0001111111110000;
-  heart_sprite[7]  = 16'b0000111111100000;
-  heart_sprite[8]  = 16'b0000011111000000;
-  heart_sprite[9]  = 16'b0000001110000000;
-  heart_sprite[10] = 16'b0000000100000000;
-  heart_sprite[11] = 16'b0000000000000000;
-  heart_sprite[12] = 16'b0000000000000000;
-  heart_sprite[13] = 16'b0000000000000000;
-  heart_sprite[14] = 16'b0000000000000000;
-  heart_sprite[15] = 16'b0000000000000000;
-end
+
+localparam [15:0] heart_sprite [0:15] = '{
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0001110001110000,
+    16'b0011111011111000,
+    16'b0011111111111000,
+    16'b0011111111111000,
+    16'b0001111111110000,
+    16'b0000111111100000,
+    16'b0000011111000000,
+    16'b0000001110000000,
+    16'b0000000100000000,
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0000000000000000
+};
 
 // 16x16 Trophy Sprite Definition
-reg [15:0] trophy_sprite [0:15];
-initial begin
-  trophy_sprite[0]  = 16'b0000000000000000;
-  trophy_sprite[1]  = 16'b0000000000000000;
-  trophy_sprite[2]  = 16'b0000000000000000;
-  trophy_sprite[3]  = 16'b0000000000000000;
-  trophy_sprite[4]  = 16'b0000000000000000;
-  trophy_sprite[5]  = 16'b0000000000000000;
-  trophy_sprite[6]  = 16'b0011111111111100;
-  trophy_sprite[7]  = 16'b0011111111111100;
-  trophy_sprite[8]  = 16'b0011111111111100;
-  trophy_sprite[9]  = 16'b0011111111111100;
-  trophy_sprite[10] = 16'b0011111111111100;
-  trophy_sprite[11] = 16'b0001111111111000;
-  trophy_sprite[12] = 16'b0000011111100000;
-  trophy_sprite[13] = 16'b0000011111100000;
-  trophy_sprite[14] = 16'b0000011111100000;
-  trophy_sprite[15] = 16'b0000111111110000;
-end
+localparam [15:0] trophy_sprite [0:15] = '{
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0000000000000000,
+    16'b0011111111111100,
+    16'b0011111111111100,
+    16'b0011111111111100,
+    16'b0011111111111100,
+    16'b0011111111111100,
+    16'b0001111111111000,
+    16'b0000011111100000,
+    16'b0000011111100000,
+    16'b0000011111100000,
+    16'b0000111111110000
+};
 
 // Position Parameters
 localparam TROPHY_WIDTH = 16;
@@ -369,43 +367,37 @@ always @(posedge clk or negedge rst_n) begin
   end
 end
 
-
-integer row_asc;      // ascending counter
-integer actual_row;   // mapped descending index
-integer col_tmp;
+// Implement the spawn_alien_bullet task
+integer col_tmp, row_tmp; 
 
 task spawn_alien_bullet;
- 
-begin
-  // Choose a random column
-  col_tmp = lfsr[3:0] % NUM_COLUMNS;
+  
+  begin
+    // Choose a random column
+    col_tmp = lfsr[3:0] % NUM_COLUMNS;
 
-  // Named block so we can "disable" it to break out after we spawn one bullet
-  for (row_asc = 0; row_asc < NUM_ROWS; row_asc = row_asc + 1) begin : BOTTOM_UP
-    // Transform ascending row_asc=0..N-1 into descending row=N-1..0
-    actual_row = (NUM_ROWS - 1) - row_asc;
+    // Find the lowest alive alien in that column
+    for (row_tmp = NUM_ROWS-1; row_tmp >= 0; row_tmp = row_tmp - 1) begin
+      if (alien_health[row_tmp][col_tmp]) begin
+        // Find an inactive bullet slot
+        for (i_temp = 0; i_temp < MAX_ALIEN_BULLETS; i_temp = i_temp + 1) begin
+          if (!alien_bullet_active[i_temp]) begin
+            alien_bullet_active[i_temp] = 1;
 
-    if (alien_health[actual_row][col_tmp]) begin
-      // Find an inactive bullet slot
-      for (i_temp = 0; i_temp < MAX_ALIEN_BULLETS; i_temp = i_temp + 1) begin
-        if (!alien_bullet_active[i_temp]) begin
-          alien_bullet_active[i_temp] = 1;
+            // Calculate the alien's position
+            alien_x = col_tmp * (ALIEN_WIDTH + ALIEN_SPACING_X) + 70 + alien_offset_x;
+            alien_y = row_tmp * (ALIEN_HEIGHT + ALIEN_SPACING_Y) + 150 + alien_offset_y;
 
-          // Calculate the alien's position
-          alien_x = col_tmp * (ALIEN_WIDTH + ALIEN_SPACING_X) + 70 + alien_offset_x;
-          alien_y = actual_row * (ALIEN_HEIGHT + ALIEN_SPACING_Y) + 150 + alien_offset_y;
-
-          // Set bullet position
-          alien_bullet_x[i_temp] = alien_x + (ALIEN_WIDTH / 2) - (BULLET_WIDTH / 2);
-          alien_bullet_y[i_temp] = alien_y + ALIEN_HEIGHT;
-
-          // Exit the bullet-slot loop
-          i_temp = MAX_ALIEN_BULLETS;
+            // Set bullet position
+            alien_bullet_x[i_temp] = alien_x + (ALIEN_WIDTH / 2) - (BULLET_WIDTH / 2);
+            alien_bullet_y[i_temp] = alien_y + ALIEN_HEIGHT;
+            i_temp = MAX_ALIEN_BULLETS; // Exit the loop after spawning a bullet
+          end
         end
+        row_tmp = -1; // Exit the loop after finding the lowest alien
       end
     end
   end
-end
 endtask
 
 // Alien bullet movement
