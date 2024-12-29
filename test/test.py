@@ -8,7 +8,7 @@
 
 ##@cocotb.test()
 ##async def test_project(dut):
-    dut._log.info("Start")
+ ##   dut._log.info("Start")
 
     # Set the clock period to 10 us (100 KHz)
     ##clock = Clock(dut.clk, 10, units="us")
@@ -49,9 +49,9 @@ from cocotb.triggers import ClockCycles, RisingEdge
 
 @cocotb.test()
 async def test_reset(dut):
-    """
-    Test that the DUT properly resets and stays in a known state.
-    """
+    
+    ##Test that the DUT properly resets and stays in a known state.
+    
     dut._log.info("=== test_reset START ===")
 
     # Use a faster clock: let's do 1 MHz for example (period = 1us)
@@ -86,9 +86,9 @@ async def test_reset(dut):
 
 @cocotb.test()
 async def test_vga_sync(dut):
-    """
-    Let the simulation run for a while to see if HSYNC/VSYNC bits in uo_out ever toggle.
-    """
+    
+    ##Let the simulation run for a while to see if HSYNC/VSYNC bits in uo_out ever toggle.
+    
     dut._log.info("=== test_vga_sync START ===")
 
     clock = Clock(dut.clk, 1, units="us")  
@@ -129,12 +129,12 @@ async def test_vga_sync(dut):
 
 @cocotb.test()
 async def test_shooter_movement(dut):
-    """
-    Test that pressing left/right changes the shooter's position eventually.
-    We cannot directly read the shooter's X position from outside the DUT,
-    but we might observe changes in color bits (R, G, B) at certain times
-    or rely on internal signals if you bring them out for debug.
-    """
+    
+    ##Test that pressing left/right changes the shooter's position eventually.
+    ##We cannot directly read the shooter's X position from outside the DUT,
+    ##but we might observe changes in color bits (R, G, B) at certain times
+    ##or rely on internal signals if you bring them out for debug.
+    
     dut._log.info("=== test_shooter_movement START ===")
 
     clock = Clock(dut.clk, 1, units="us")  
@@ -182,11 +182,11 @@ async def test_shooter_movement(dut):
 
 @cocotb.test()
 async def test_fire_button(dut):
-    """
-    Test pressing the fire button. We expect eventually the bullet signals might
-    show up on the VGA. In a short test, it might still be tough to see unless you
-    run enough cycles or bring out internal signals (bullet_x, bullet_y).
-    """
+    
+    ##Test pressing the fire button. We expect eventually the bullet signals might
+    ##show up on the VGA. In a short test, it might still be tough to see unless you
+    ##run enough cycles or bring out internal signals (bullet_x, bullet_y).
+    
     dut._log.info("=== test_fire_button START ===")
 
     clock = Clock(dut.clk, 1, units="us")  
