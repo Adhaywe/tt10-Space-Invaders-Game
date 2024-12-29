@@ -1,4 +1,5 @@
 `default_nettype none
+`timescale 1ns / 1ps
 
 module tt_um_space_invader_vga(
   input  wire [7:0] ui_in,    // Dedicated inputs for player controls
@@ -369,25 +370,25 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 // Implement the spawn_alien_bullet task
-//integer col, row, 
+integer col_tmp, row_tmp; 
 
 task spawn_alien_bullet;
   
   begin
     // Choose a random column
-    col = lfsr[3:0] % NUM_COLUMNS;
+    col_tmp = lfsr[3:0] % NUM_COLUMNS;
 
     // Find the lowest alive alien in that column
-    for (row = NUM_ROWS-1; row >= 0; row = row - 1) begin
-      if (alien_health[row][col]) begin
+    for (row_tmp = NUM_ROWS-1; row_tmp >= 0; row_tmp = row_tmp - 1) begin
+      if (alien_health[row_tmp][col_tmp]) begin
         // Find an inactive bullet slot
         for (i_temp = 0; i_temp < MAX_ALIEN_BULLETS; i_temp = i_temp + 1) begin
           if (!alien_bullet_active[i_temp]) begin
             alien_bullet_active[i_temp] = 1;
 
             // Calculate the alien's position
-            alien_x = col * (ALIEN_WIDTH + ALIEN_SPACING_X) + 70 + alien_offset_x;
-            alien_y = row * (ALIEN_HEIGHT + ALIEN_SPACING_Y) + 150 + alien_offset_y;
+            alien_x = col_tmp * (ALIEN_WIDTH + ALIEN_SPACING_X) + 70 + alien_offset_x;
+            alien_y = row_tmp * (ALIEN_HEIGHT + ALIEN_SPACING_Y) + 150 + alien_offset_y;
 
             // Set bullet position
             alien_bullet_x[i_temp] = alien_x + (ALIEN_WIDTH / 2) - (BULLET_WIDTH / 2);
@@ -395,7 +396,7 @@ task spawn_alien_bullet;
             i_temp = MAX_ALIEN_BULLETS; // Exit the loop after spawning a bullet
           end
         end
-        row = -1; // Exit the loop after finding the lowest alien
+        row_tmp = -1; // Exit the loop after finding the lowest alien
       end
     end
   end
@@ -434,6 +435,7 @@ reg alien_pixel;
 reg [2:0] alien_color;
 reg [9:0] alien_x, alien_y;
 reg [9:0] sprite_x, sprite_y;
+integer row_tmp1, col_tmp1;
 
 always @* begin
   
@@ -445,18 +447,19 @@ always @* begin
   sprite_x = 0;
   sprite_y = 0;
 
+
   // Loop over each row and column of aliens
   if (current_state == PLAYING) begin
-    for (row = 0; row < NUM_ROWS; row = row + 1) begin
-      for (col = 0; col < NUM_COLUMNS; col = col + 1) begin
+    for (row_tmp1 = 0; row < NUM_ROWS; row_tmp1 = row_tmp1 + 1) begin
+      for (col_tmp1 = 0; col_tmp1 < NUM_COLUMNS; col_tmp1 = col_tmp1 + 1) begin
         // Check if the alien is alive
-        if (alien_health[row][col]) begin 
+        if (alien_health[row_tmp1][col_tmp1]) begin 
           // Calculate the top-left position of each alien with movement offsets
-          alien_x = col * (ALIEN_WIDTH + ALIEN_SPACING_X) + 70 + alien_offset_x;
-          alien_y = row * (ALIEN_HEIGHT + ALIEN_SPACING_Y) + 150 + alien_offset_y;
+          alien_x = col_tmp1 * (ALIEN_WIDTH + ALIEN_SPACING_X) + 70 + alien_offset_x;
+          alien_y = row_tmp1 * (ALIEN_HEIGHT + ALIEN_SPACING_Y) + 150 + alien_offset_y;
 
           // Set alien sprite dimensions based on the row
-          if (row == 0) begin
+          if (row_tmp1 == 0) begin
             sprite_x = (pix_x - alien_x) / 2;  // Smaller sprite (8x8 pixels)
             sprite_y = (pix_y - alien_y) / 2;
             if (pix_x >= alien_x && pix_x < alien_x + 16 &&
@@ -466,7 +469,7 @@ always @* begin
               alien_pixel = 1;
               alien_color = 3'b011;  // Bright white color for small aliens
             end
-          end else if (row == 1 || row == 2) begin
+          end else if (row_tmp1 == 1 || row_tmp1 == 2) begin
             sprite_x = (pix_x - alien_x) / 2;  // Medium sprite (12x12 pixels)
             sprite_y = (pix_y - alien_y) / 2;
             if (pix_x >= alien_x && pix_x < alien_x + 24 &&
@@ -476,7 +479,7 @@ always @* begin
               alien_pixel = 1;
               alien_color = 3'b101;  // Bright white color for distinct aliens
             end
-          end else if (row == 3 || row == 4) begin
+          end else if (row_tmp1 == 3 || row_tmp1 == 4) begin
             sprite_x = (pix_x - alien_x) / 2;  // Smaller large sprite (10x10 pixels)
             sprite_y = (pix_y - alien_y) / 2;
             if (pix_x >= alien_x && pix_x < alien_x + 20 &&
