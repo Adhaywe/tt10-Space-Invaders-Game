@@ -1,8 +1,7 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-
-module tt_um_space_invader_vga (
+module tt_um_space_invader_vga(
   input  wire [7:0] ui_in,    // Dedicated inputs for player controls
   output wire [7:0] uo_out,   // Dedicated outputs
   input  wire [7:0] uio_in,   // IOs: Input path
@@ -105,104 +104,107 @@ hvsync_generator hvsync_gen(
 
 // Alien sprite definitions
 // Small Alien (Top Row)
-localparam [7:0] small_alien_sprite [0:7] = '{
-    8'b00011000,
-    8'b00111100,
-    8'b01111110,
-    8'b11011011,
-    8'b11111111,
-    8'b00100100,
-    8'b01000010,
-    8'b10000001
-};
+reg [7:0] small_alien_sprite [0:7];
+initial begin
+  small_alien_sprite[0] = 8'b00011000;
+  small_alien_sprite[1] = 8'b00111100;
+  small_alien_sprite[2] = 8'b01111110;
+  small_alien_sprite[3] = 8'b11011011;
+  small_alien_sprite[4] = 8'b11111111;
+  small_alien_sprite[5] = 8'b00100100;
+  small_alien_sprite[6] = 8'b01000010;
+  small_alien_sprite[7] = 8'b10000001;
+end
 
 // Distinct Alien Shape (2nd and 3rd Rows)
+reg [11:0] distinct_alien_sprite [0:11];
+initial begin
+  distinct_alien_sprite[0]  = 12'b000011100000;
+  distinct_alien_sprite[1]  = 12'b000111110000;
+  distinct_alien_sprite[2]  = 12'b001111111000;
+  distinct_alien_sprite[3]  = 12'b011011101100;
+  distinct_alien_sprite[4]  = 12'b111111111110;
+  distinct_alien_sprite[5]  = 12'b101111111010;
+  distinct_alien_sprite[6]  = 12'b101001100010;
+  distinct_alien_sprite[7]  = 12'b101000000010;
+  distinct_alien_sprite[8]  = 12'b001100110000;
+  distinct_alien_sprite[9]  = 12'b010000001000;
+  distinct_alien_sprite[10] = 12'b100000000100;
+  distinct_alien_sprite[11] = 12'b000000000000;
+end
 
-localparam [11:0] distinct_alien_sprite [0:11] = '{
-    12'b000011100000,
-    12'b000111110000,
-    12'b001111111000,
-    12'b011011101100,
-    12'b111111111110,
-    12'b101111111010,
-    12'b101001100010,
-    12'b101000000010,
-    12'b001100110000,
-    12'b010000001000,
-    12'b100000000100,
-    12'b000000000000
-};
-
-
-localparam [9:0] small_large_alien_sprite [0:9] = '{
-  10'b0011111100,
-  10'b0111111110,
-  10'b1101101101,
-  10'b1111111111,
-  10'b0111111110,
-  10'b0010010010,
-  10'b0100000100,
-  10'b1000000010,
-  10'b1100000110,
-  10'b0111111110
-};
-
+// Smaller Large Alien (4th and 5th Rows)
+reg [9:0] small_large_alien_sprite [0:9];
+initial begin
+  small_large_alien_sprite[0] = 10'b0011111100;
+  small_large_alien_sprite[1] = 10'b0111111110;
+  small_large_alien_sprite[2] = 10'b1101101101;
+  small_large_alien_sprite[3] = 10'b1111111111;
+  small_large_alien_sprite[4] = 10'b0111111110;
+  small_large_alien_sprite[5] = 10'b0010010010;
+  small_large_alien_sprite[6] = 10'b0100000100;
+  small_large_alien_sprite[7] = 10'b1000000010;
+  small_large_alien_sprite[8] = 10'b1100000110;
+  small_large_alien_sprite[9] = 10'b0111111110;
+end
 
 // 7-segment display font for digits 0-9
+reg [6:0] digit_segments [0:9];
 reg [3:0] digit0, digit1, digit2;
-localparam [6:0] digit_segments [0:9] = '{
-    7'b0111111,  // 0
-    7'b0000110,  // 1
-    7'b1011011,  // 2
-    7'b1001111,  // 3
-    7'b1100110,  // 4
-    7'b1101101,  // 5
-    7'b1111101,  // 6
-    7'b0000111,  // 7
-    7'b1111111,  // 8
-    7'b1101111   // 9
-};
+initial begin
+  digit_segments[0] = 7'b0111111;  // 0
+  digit_segments[1] = 7'b0000110;  // 1
+  digit_segments[2] = 7'b1011011;  // 2
+  digit_segments[3] = 7'b1001111;  // 3
+  digit_segments[4] = 7'b1100110;  // 4
+  digit_segments[5] = 7'b1101101;  // 5
+  digit_segments[6] = 7'b1111101;  // 6
+  digit_segments[7] = 7'b0000111;  // 7
+  digit_segments[8] = 7'b1111111;  // 8
+  digit_segments[9] = 7'b1101111;  // 9
+end
 
 // 16x16 Heart sprite
-
-localparam [15:0] heart_sprite [0:15] = '{
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0001110001110000,
-    16'b0011111011111000,
-    16'b0011111111111000,
-    16'b0011111111111000,
-    16'b0001111111110000,
-    16'b0000111111100000,
-    16'b0000011111000000,
-    16'b0000001110000000,
-    16'b0000000100000000,
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0000000000000000
-};
+reg [15:0] heart_sprite [0:15];
+initial begin
+  heart_sprite[0]  = 16'b0000000000000000;
+  heart_sprite[1]  = 16'b0000000000000000;
+  heart_sprite[2]  = 16'b0001110001110000;
+  heart_sprite[3]  = 16'b0011111011111000;
+  heart_sprite[4]  = 16'b0011111111111000;
+  heart_sprite[5]  = 16'b0011111111111000;
+  heart_sprite[6]  = 16'b0001111111110000;
+  heart_sprite[7]  = 16'b0000111111100000;
+  heart_sprite[8]  = 16'b0000011111000000;
+  heart_sprite[9]  = 16'b0000001110000000;
+  heart_sprite[10] = 16'b0000000100000000;
+  heart_sprite[11] = 16'b0000000000000000;
+  heart_sprite[12] = 16'b0000000000000000;
+  heart_sprite[13] = 16'b0000000000000000;
+  heart_sprite[14] = 16'b0000000000000000;
+  heart_sprite[15] = 16'b0000000000000000;
+end
 
 // 16x16 Trophy Sprite Definition
-localparam [15:0] trophy_sprite [0:15] = '{
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0000000000000000,
-    16'b0011111111111100,
-    16'b0011111111111100,
-    16'b0011111111111100,
-    16'b0011111111111100,
-    16'b0011111111111100,
-    16'b0001111111111000,
-    16'b0000011111100000,
-    16'b0000011111100000,
-    16'b0000011111100000,
-    16'b0000111111110000
-};
+reg [15:0] trophy_sprite [0:15];
+initial begin
+  trophy_sprite[0]  = 16'b0000000000000000;
+  trophy_sprite[1]  = 16'b0000000000000000;
+  trophy_sprite[2]  = 16'b0000000000000000;
+  trophy_sprite[3]  = 16'b0000000000000000;
+  trophy_sprite[4]  = 16'b0000000000000000;
+  trophy_sprite[5]  = 16'b0000000000000000;
+  trophy_sprite[6]  = 16'b0011111111111100;
+  trophy_sprite[7]  = 16'b0011111111111100;
+  trophy_sprite[8]  = 16'b0011111111111100;
+  trophy_sprite[9]  = 16'b0011111111111100;
+  trophy_sprite[10] = 16'b0011111111111100;
+  trophy_sprite[11] = 16'b0001111111111000;
+  trophy_sprite[12] = 16'b0000011111100000;
+  trophy_sprite[13] = 16'b0000011111100000;
+  trophy_sprite[14] = 16'b0000011111100000;
+  trophy_sprite[15] = 16'b0000111111110000;
+end
 
 // Position Parameters
 localparam TROPHY_WIDTH = 16;
