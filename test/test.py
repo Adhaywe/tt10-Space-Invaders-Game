@@ -92,7 +92,7 @@ async def test_vga_sync(dut):
     
     dut._log.info("=== test_vga_sync START ===")
 
-    clock = Clock(dut.clk, 1, units="us")  
+    clock = Clock(dut.clk, 40, units="ns")  
     cocotb.start_soon(clock.start())
 
     # Reset
