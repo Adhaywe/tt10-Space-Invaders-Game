@@ -369,37 +369,43 @@ always @(posedge clk or negedge rst_n) begin
   end
 end
 
-// Implement the spawn_alien_bullet task
-integer col_tmp, row_tmp; 
+
+integer row_asc;      // ascending counter
+integer actual_row;   // mapped descending index
+integer col_tmp;
 
 task spawn_alien_bullet;
-  
-  begin
-    // Choose a random column
-    col_tmp = lfsr[3:0] % NUM_COLUMNS;
+ 
+begin
+  // Choose a random column
+  col_tmp = lfsr[3:0] % NUM_COLUMNS;
 
-    // Find the lowest alive alien in that column
-    for (row_tmp = NUM_ROWS-1; row_tmp >= 0; row_tmp = row_tmp - 1) begin
-      if (alien_health[row_tmp][col_tmp]) begin
-        // Find an inactive bullet slot
-        for (i_temp = 0; i_temp < MAX_ALIEN_BULLETS; i_temp = i_temp + 1) begin
-          if (!alien_bullet_active[i_temp]) begin
-            alien_bullet_active[i_temp] = 1;
+  // Named block so we can "disable" it to break out after we spawn one bullet
+  for (row_asc = 0; row_asc < NUM_ROWS; row_asc = row_asc + 1) begin : BOTTOM_UP
+    // Transform ascending row_asc=0..N-1 into descending row=N-1..0
+    actual_row = (NUM_ROWS - 1) - row_asc;
 
-            // Calculate the alien's position
-            alien_x = col_tmp * (ALIEN_WIDTH + ALIEN_SPACING_X) + 70 + alien_offset_x;
-            alien_y = row_tmp * (ALIEN_HEIGHT + ALIEN_SPACING_Y) + 150 + alien_offset_y;
+    if (alien_health[actual_row][col_tmp]) begin
+      // Find an inactive bullet slot
+      for (i_temp = 0; i_temp < MAX_ALIEN_BULLETS; i_temp = i_temp + 1) begin
+        if (!alien_bullet_active[i_temp]) begin
+          alien_bullet_active[i_temp] = 1;
 
-            // Set bullet position
-            alien_bullet_x[i_temp] = alien_x + (ALIEN_WIDTH / 2) - (BULLET_WIDTH / 2);
-            alien_bullet_y[i_temp] = alien_y + ALIEN_HEIGHT;
-            i_temp = MAX_ALIEN_BULLETS; // Exit the loop after spawning a bullet
-          end
+          // Calculate the alien's position
+          alien_x = col_tmp * (ALIEN_WIDTH + ALIEN_SPACING_X) + 70 + alien_offset_x;
+          alien_y = actual_row * (ALIEN_HEIGHT + ALIEN_SPACING_Y) + 150 + alien_offset_y;
+
+          // Set bullet position
+          alien_bullet_x[i_temp] = alien_x + (ALIEN_WIDTH / 2) - (BULLET_WIDTH / 2);
+          alien_bullet_y[i_temp] = alien_y + ALIEN_HEIGHT;
+
+          // Exit the bullet-slot loop
+          i_temp = MAX_ALIEN_BULLETS;
         end
-        row_tmp = -1; // Exit the loop after finding the lowest alien
       end
     end
   end
+end
 endtask
 
 // Alien bullet movement
@@ -450,7 +456,7 @@ always @* begin
 
   // Loop over each row and column of aliens
   if (current_state == PLAYING) begin
-    for (row_tmp1 = 0; row < NUM_ROWS; row_tmp1 = row_tmp1 + 1) begin
+    for (row_tmp1 = 0; row_tmp1 < NUM_ROWS; row_tmp1 = row_tmp1 + 1) begin
       for (col_tmp1 = 0; col_tmp1 < NUM_COLUMNS; col_tmp1 = col_tmp1 + 1) begin
         // Check if the alien is alive
         if (alien_health[row_tmp1][col_tmp1]) begin 
