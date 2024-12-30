@@ -439,7 +439,7 @@ reg [9:0] alien_x, alien_y;
 reg [9:0] sprite_x, sprite_y;
 integer row_tmp1, col_tmp1;
 
-always @(*) begin
+always @* begin
   
   // Default assignments
   alien_pixel = 0;
