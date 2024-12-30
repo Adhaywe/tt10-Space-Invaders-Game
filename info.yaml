@@ -22,7 +22,7 @@ project:
     - "small_alien.v"
     - "medium_alien.v"
     - "large_alien.v"
-    - "digit_segements.v"
+    - "digit_segments.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
