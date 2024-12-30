@@ -328,7 +328,8 @@ always @(posedge clk or negedge rst_n) begin
     barrier_hitpoints[1] <= 4'd10;
     barrier_hitpoints[2] <= 4'd10;
     barrier_hitpoints[3] <= 4'd10;
-  end else if (current_state == PLAYING) begin
+  end 
+  else if (current_state == PLAYING) begin
     // Increment the move counter to slow down alien movement updates
     alien_move_counter <= alien_move_counter + 1;
     alien_shoot_counter <= alien_shoot_counter + 1;
@@ -409,7 +410,8 @@ always @(posedge clk or negedge rst_n) begin
   if (!rst_n || ui_in[3]) begin
     // Reset alien bullet movement counter
     alien_bullet_move_counter <= 0;
-  end else if (current_state == PLAYING) begin
+  end 
+  else if (current_state == PLAYING) begin
     alien_bullet_move_counter <= alien_bullet_move_counter + 1;
 
     if (alien_bullet_move_counter >= 100000) begin // Adjust speed as needed
@@ -437,7 +439,7 @@ reg [9:0] alien_x, alien_y;
 reg [9:0] sprite_x, sprite_y;
 integer row_tmp1, col_tmp1;
 
-always @* begin
+always @(*) begin
   
   // Default assignments
   alien_pixel = 0;
