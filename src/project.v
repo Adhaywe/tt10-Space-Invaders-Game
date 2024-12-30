@@ -1,6 +1,6 @@
 `default_nettype none
 
-module tt_um_space_invader_vga (
+module tt_um_space_invader_vga  ( 
   input  wire [7:0] ui_in,    // Dedicated inputs for player controls
   output wire [7:0] uo_out,   // Dedicated outputs
   input  wire [7:0] uio_in,   // IOs: Input path
@@ -119,21 +119,36 @@ small_large_alien_rom rom_small_large_alien(
   .row_data(small_large_alien_data)
 );
 
-// 7-segment display font for digits 0-9
-reg [6:0] digit_segments [0:9];
+// Instantiate Digit Segments ROM Modules
+wire [6:0] digit0_segments;
+wire [6:0] digit1_segments;
+wire [6:0] digit2_segments;
+wire [6:0] digit_health_segments;
 reg [3:0] digit0, digit1, digit2;
-initial begin
-  digit_segments[0] = 7'b0111111;  // 0
-  digit_segments[1] = 7'b0000110;  // 1
-  digit_segments[2] = 7'b1011011;  // 2
-  digit_segments[3] = 7'b1001111;  // 3
-  digit_segments[4] = 7'b1100110;  // 4
-  digit_segments[5] = 7'b1101101;  // 5
-  digit_segments[6] = 7'b1111101;  // 6
-  digit_segments[7] = 7'b0000111;  // 7
-  digit_segments[8] = 7'b1111111;  // 8
-  digit_segments[9] = 7'b1101111;  // 9
-end
+
+// Instantiate ROM for each digit
+digit_segments_rom rom_digit0 (
+    .digit_index(digit0),
+    .segments(digit0_segments)
+);
+
+digit_segments_rom rom_digit1 (
+    .digit_index(digit1),
+    .segments(digit1_segments)
+);
+
+digit_segments_rom rom_digit2 (
+    .digit_index(digit2),
+    .segments(digit2_segments)
+);
+
+digit_segments_rom rom_digit_health (
+    .digit_index(digit_health),
+    .segments(digit_health_segments)
+);
+
+// Remove the internal digit_segments array
+// reg [6:0] digit_segments [0:9]; // Removed
 
 // 16x16 Heart sprite
 reg [15:0] heart_sprite [0:15];
@@ -553,42 +568,6 @@ always @(posedge clk or negedge rst_n) begin
     barrier_hitpoints[1] <= 4'd10;
     barrier_hitpoints[2] <= 4'd10;
     barrier_hitpoints[3] <= 4'd10;
-  end 
-  else if ( game_over_flag ) begin
-    shooter_x <= 253;
-    bullet_x <= 0;
-    bullet_y <= 0;
-    bullet_active <= 0;
-    movement_counter <= 0;
-    bullet_move_counter <= 0;
-    score <= 0;
-    game_won_flag <= 0;
-    game_over_flag <= 0;
-    player_health <= 2'b11;
-    aliens_remaining <= NUM_ROWS*NUM_COLUMNS;
-    for (i = 0; i < NUM_ROWS; i = i + 1) begin
-      for (j = 0; j < NUM_COLUMNS; j = j + 1) begin
-        alien_health[i][j] <= 1'b1;
-      end
-    end
-    alien_offset_x <= 0;
-    alien_offset_y <= 0;
-    alien_direction <= 1;
-    alien_move_counter <= 0;
-    prev_fire_button <= 0;
-    collision_occurred <= 0;
-    for (i = 0; i < MAX_ALIEN_BULLETS; i = i + 1) begin
-      alien_bullet_x[i] <= 0;
-      alien_bullet_y[i] <= 0;
-      alien_bullet_active[i] <= 0;
-    end
-    alien_shoot_counter <= 0;
-    alien_bullet_move_counter <= 0;
-    lfsr <= 16'hACE1;
-    barrier_hitpoints[0] <= 4'd10;
-    barrier_hitpoints[1] <= 4'd10;
-    barrier_hitpoints[2] <= 4'd10;
-    barrier_hitpoints[3] <= 4'd10;
     end 
     else if ( game_won_flag) begin
     shooter_x <= 253;
@@ -625,7 +604,42 @@ always @(posedge clk or negedge rst_n) begin
     barrier_hitpoints[1] <= 4'd10;
     barrier_hitpoints[2] <= 4'd10;
     barrier_hitpoints[3] <= 4'd10;
-  end else begin
+  end else if ( game_over_flag ) begin
+    shooter_x <= 253;
+    bullet_x <= 0;
+    bullet_y <= 0;
+    bullet_active <= 0;
+    movement_counter <= 0;
+    bullet_move_counter <= 0;
+    score <= 0;
+    game_won_flag <= 0;
+    game_over_flag <= 0;
+    player_health <= 2'b11;
+    aliens_remaining <= NUM_ROWS*NUM_COLUMNS;
+    for (i = 0; i < NUM_ROWS; i = i + 1) begin
+      for (j = 0; j < NUM_COLUMNS; j = j + 1) begin
+        alien_health[i][j] <= 1'b1;
+      end
+    end
+    alien_offset_x <= 0;
+    alien_offset_y <= 0;
+    alien_direction <= 1;
+    alien_move_counter <= 0;
+    prev_fire_button <= 0;
+    collision_occurred <= 0;
+    for (i = 0; i < MAX_ALIEN_BULLETS; i = i + 1) begin
+      alien_bullet_x[i] <= 0;
+      alien_bullet_y[i] <= 0;
+      alien_bullet_active[i] <= 0;
+    end
+    alien_shoot_counter <= 0;
+    alien_bullet_move_counter <= 0;
+    lfsr <= 16'hACE1;
+    barrier_hitpoints[0] <= 4'd10;
+    barrier_hitpoints[1] <= 4'd10;
+    barrier_hitpoints[2] <= 4'd10;
+    barrier_hitpoints[3] <= 4'd10;
+    end else begin
     if (current_state == PLAYING) begin
       collision_occurred <= 0;
 
@@ -646,7 +660,7 @@ always @(posedge clk or negedge rst_n) begin
         bullet_move_counter <= 0;
       end
 
-      
+
       // Collision Detection and Scoring
       if (bullet_active) begin
         // Check collision with aliens
@@ -922,21 +936,23 @@ always @(*) begin
   end
 end
 
+// Health Pixel Rendering
 wire health_pixel = (
   pix_x >= HEALTH_DIGIT_X &&
   pix_x < HEALTH_DIGIT_X + DIGIT_WIDTH &&
   pix_y >= HEALTH_DIGIT_Y &&
   pix_y < HEALTH_DIGIT_Y + DIGIT_HEIGHT &&
-  digit_segment(digit_segments[digit_health], pix_x, pix_y, HEALTH_DIGIT_X, HEALTH_DIGIT_Y)
+  digit_segment(digit_health_segments, pix_x, pix_y, HEALTH_DIGIT_X, HEALTH_DIGIT_Y)
 );
 
+// Score Digit Pixel Rendering
 wire score_pixel =
     ((pix_x >= DIGIT2_X) && (pix_x < DIGIT2_X + DIGIT_WIDTH) && (pix_y >= DIGIT_Y) && (pix_y < DIGIT_Y + DIGIT_HEIGHT) &&
-     digit_segment(digit_segments[digit2], pix_x, pix_y, DIGIT2_X, DIGIT_Y))
+     digit_segment(digit2_segments, pix_x, pix_y, DIGIT2_X, DIGIT_Y))
  || ((pix_x >= DIGIT1_X) && (pix_x < DIGIT1_X + DIGIT_WIDTH) && (pix_y >= DIGIT_Y) && (pix_y < DIGIT_Y + DIGIT_HEIGHT) &&
-     digit_segment(digit_segments[digit1], pix_x, pix_y, DIGIT1_X, DIGIT_Y))
+     digit_segment(digit1_segments, pix_x, pix_y, DIGIT1_X, DIGIT_Y))
  || ((pix_x >= DIGIT0_X) && (pix_x < DIGIT0_X + DIGIT_WIDTH) && (pix_y >= DIGIT_Y) && (pix_y < DIGIT_Y + DIGIT_HEIGHT) &&
-     digit_segment(digit_segments[digit0], pix_x, pix_y, DIGIT0_X, DIGIT_Y));
+     digit_segment(digit0_segments, pix_x, pix_y, DIGIT0_X, DIGIT_Y));
 
 // VGA Output
 assign R = video_active ? (
@@ -994,4 +1010,3 @@ always @* begin
 end
 
 endmodule
-
