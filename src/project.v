@@ -390,8 +390,8 @@ module tt_um_space_invaders_game (
     reg [1:0] movement_dir;
     reg prev_button0, prev_button1;
 
-    always @(posedge clk or negedge rst_n) begin
-      if (!rst_n) begin
+    always @(posedge clk) begin
+      if (~rst_n) begin
         prev_button0  <= 0;
         prev_button1  <= 0;
         movement_dir  <= DIR_IDLE;
@@ -421,7 +421,7 @@ module tt_um_space_invaders_game (
     localparam SHOOTER_SIZE  = 16;
     localparam SHOOTER_Y     = 430;  // near bottom of 480
     localparam SHOOTER_MIN_X = 0;
-    localparam SHOOTER_MAX_X = 480 - 118;
+    localparam SHOOTER_MAX_X = 640 - 118;
 
     reg [9:0] shooter_x;
     reg [9:0] prev_vpos_shooter;
