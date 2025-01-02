@@ -28,7 +28,7 @@ module tb ();
 `endif
 
   // Replace tt_um_example with your module name:
-  tt_um_space_invader_vga user_project (
+tt_um_space_invaders_game user_project (
 
       // Include power ports for the Gate Level test:
 `ifdef GL_TEST

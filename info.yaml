@@ -18,18 +18,22 @@ project:
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
     - "project.v"
-    - "hvsync_generator.v"
-    - "small_alien.v"
-    - "medium_alien.v"
-    - "large_alien.v"
-    - "digit_segments.v"
+    - "vag_sync_generator.v"
+    - "draw_small_alien.v"
+    - "draw_medium_alien.v"
+    - "draw_alien3.v"
+    - "draw_shooter.v"
+    - "alien3_rom.v"
+    - "medium_alien_rom.v"
+    - "shooter_rom.v"
+    - "small_alien_rom.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
   ui[0]: "input 1"
   ui[1]: "input 2"
-  ui[2]: "input 3"
+  ui[2]: ""
   ui[3]: ""
   ui[4]: ""
   ui[5]: ""
