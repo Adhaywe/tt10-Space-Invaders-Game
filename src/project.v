@@ -95,65 +95,6 @@ module tt_um_space_invaders_game (
     reg [2:0] barrier_health [0:NUM_BARRIERS-1]; 
     reg [1:0] shooter_lives; 
 
-    // Initialize aliens_alive, barrier_health, and shooter_lives
-    always @(posedge clk) begin
-    if (~rst_n) begin
-        // Initialize Aliens as alive
-        aliens_alive[0][0] <= 1'b1;
-        aliens_alive[0][1] <= 1'b1;
-        aliens_alive[0][2] <= 1'b1;
-        aliens_alive[0][3] <= 1'b1;
-        aliens_alive[0][4] <= 1'b1;
-        aliens_alive[0][5] <= 1'b1;
-        aliens_alive[0][6] <= 1'b1;
-        aliens_alive[0][7] <= 1'b1;
-        
-        aliens_alive[1][0] <= 1'b1;
-        aliens_alive[1][1] <= 1'b1;
-        aliens_alive[1][2] <= 1'b1;
-        aliens_alive[1][3] <= 1'b1;
-        aliens_alive[1][4] <= 1'b1;
-        aliens_alive[1][5] <= 1'b1;
-        aliens_alive[1][6] <= 1'b1;
-        aliens_alive[1][7] <= 1'b1;
-        
-        aliens_alive[2][0] <= 1'b1;
-        aliens_alive[2][1] <= 1'b1;
-        aliens_alive[2][2] <= 1'b1;
-        aliens_alive[2][3] <= 1'b1;
-        aliens_alive[2][4] <= 1'b1;
-        aliens_alive[2][5] <= 1'b1;
-        aliens_alive[2][6] <= 1'b1;
-        aliens_alive[2][7] <= 1'b1;
-        
-        aliens_alive[3][0] <= 1'b1;
-        aliens_alive[3][1] <= 1'b1;
-        aliens_alive[3][2] <= 1'b1;
-        aliens_alive[3][3] <= 1'b1;
-        aliens_alive[3][4] <= 1'b1;
-        aliens_alive[3][5] <= 1'b1;
-        aliens_alive[3][6] <= 1'b1;
-        aliens_alive[3][7] <= 1'b1;
-        
-        aliens_alive[4][0] <= 1'b1;
-        aliens_alive[4][1] <= 1'b1;
-        aliens_alive[4][2] <= 1'b1;
-        aliens_alive[4][3] <= 1'b1;
-        aliens_alive[4][4] <= 1'b1;
-        aliens_alive[4][5] <= 1'b1;
-        aliens_alive[4][6] <= 1'b1;
-        aliens_alive[4][7] <= 1'b1;
-
-        // Initialize Barriers Health to 5
-        barrier_health[0] <= 3'd5;
-        barrier_health[1] <= 3'd5;
-        barrier_health[2] <= 3'd5;
-        barrier_health[3] <= 3'd5;
-
-        // Initialize Shooter Lives to 3
-        shooter_lives <= 2'd3;
-    end 
-end
 
     //----------------------------------------------------
     // 4) Small Aliens (16×16) in one row
@@ -704,16 +645,63 @@ end
     // Player Bullet 0
     always @(posedge clk) begin
         if (~rst_n) begin
-            // Reset handled earlier
-        end else begin
-            if (pix_y == 0 && prev_vpos != 0) begin
-                if (pb_active[0]) begin
-                    // Check collision with Aliens
-                    // Row 0: Small Aliens [0][0] to [0][7]
-                    // Aliens positions: s1_x to s8_x at SMALL_Y
-                    // Aliens Alive: aliens_alive[0][0] to aliens_alive[0][7]
+           
+        // Initialize Aliens as alive
+        aliens_alive[0][0] <= 1'b1;
+        aliens_alive[0][1] <= 1'b1;
+        aliens_alive[0][2] <= 1'b1;
+        aliens_alive[0][3] <= 1'b1;
+        aliens_alive[0][4] <= 1'b1;
+        aliens_alive[0][5] <= 1'b1;
+        aliens_alive[0][6] <= 1'b1;
+        aliens_alive[0][7] <= 1'b1;
+        
+        aliens_alive[1][0] <= 1'b1;
+        aliens_alive[1][1] <= 1'b1;
+        aliens_alive[1][2] <= 1'b1;
+        aliens_alive[1][3] <= 1'b1;
+        aliens_alive[1][4] <= 1'b1;
+        aliens_alive[1][5] <= 1'b1;
+        aliens_alive[1][6] <= 1'b1;
+        aliens_alive[1][7] <= 1'b1;
+        
+        aliens_alive[2][0] <= 1'b1;
+        aliens_alive[2][1] <= 1'b1;
+        aliens_alive[2][2] <= 1'b1;
+        aliens_alive[2][3] <= 1'b1;
+        aliens_alive[2][4] <= 1'b1;
+        aliens_alive[2][5] <= 1'b1;
+        aliens_alive[2][6] <= 1'b1;
+        aliens_alive[2][7] <= 1'b1;
+        
+        aliens_alive[3][0] <= 1'b1;
+        aliens_alive[3][1] <= 1'b1;
+        aliens_alive[3][2] <= 1'b1;
+        aliens_alive[3][3] <= 1'b1;
+        aliens_alive[3][4] <= 1'b1;
+        aliens_alive[3][5] <= 1'b1;
+        aliens_alive[3][6] <= 1'b1;
+        aliens_alive[3][7] <= 1'b1;
+        
+        aliens_alive[4][0] <= 1'b1;
+        aliens_alive[4][1] <= 1'b1;
+        aliens_alive[4][2] <= 1'b1;
+        aliens_alive[4][3] <= 1'b1;
+        aliens_alive[4][4] <= 1'b1;
+        aliens_alive[4][5] <= 1'b1;
+        aliens_alive[4][6] <= 1'b1;
+        aliens_alive[4][7] <= 1'b1;
 
-                    // Alien [0][0]
+        // Initialize Barriers Health to 5
+        barrier_health[0] <= 3'd5;
+        barrier_health[1] <= 3'd5;
+        barrier_health[2] <= 3'd5;
+        barrier_health[3] <= 3'd5;
+
+            //
+        end else begin
+              if (pix_y == 0 && prev_vpos != 0) begin
+                if (pb_active[0]) begin
                     if (aliens_alive[0][0] &&
                         pb_x[0] + BULLET_W > s1_x &&
                         pb_x[0] < s1_x + SMALL_SIZE &&
@@ -723,7 +711,6 @@ end
                             pb_active[0] <= 0;
                             score <= score + 30;
                     end
-
                     // Alien [0][1]
                     if (aliens_alive[0][1] &&
                         pb_x[0] + BULLET_W > s2_x &&
@@ -1172,16 +1159,12 @@ end
                             pb_active[0] <= 0;
                     end
                 end
-            end
-        end
-    end
+            
+        
+    
 
-    // Player Bullet 1 Collision Detection
-    always @(posedge clk) begin
-        if (~rst_n) begin
-            // Reset handled earlier
-        end else begin
-            if (pix_y == 0 && prev_vpos != 0) begin
+  
+            
                 if (pb_active[1]) begin
                     // Check collision with Aliens
                     // Row 0: Small Aliens [0][0] to [0][7]
@@ -1646,18 +1629,9 @@ end
                             pb_active[1] <= 0;
                     end
                 end
-            end
-        end
-    end
-
-
-
-    // Player Bullet 2 Collision Detection
-    always @(posedge clk) begin
-        if (~rst_n) begin
-            // Reset handled earlier
-        end else begin
-            if (pix_y == 0 && prev_vpos != 0) begin
+          
+    
+            
                 if (pb_active[2]) begin
                     // Check collision with Aliens
                     // Row 0: Small Aliens [0][0] to [0][7]
@@ -2122,17 +2096,9 @@ end
                             pb_active[2] <= 0;
                     end
                 end
-            end
-        end
-    end
-
-
-    // Player Bullet 2 Collision Detection
-    always @(posedge clk) begin
-        if (~rst_n) begin
-            // Reset handled earlier
-        end else begin
-            if (pix_y == 0 && prev_vpos != 0) begin
+            
+   
+           
                 if (pb_active[3]) begin
                     // Check collision with Aliens
                     // Row 0: Small Aliens [0][0] to [0][7]
@@ -2595,13 +2561,13 @@ end
                             pb_active[3] <= 0;
                     end
                 end
-            end
-        end
-    end
+         
 
 
    
-
+              end
+        end
+    end
    
     //----------------------------------------------------
     // Alien Bullet vs. Shooter and Barriers Collision
@@ -2731,6 +2697,7 @@ end
         end
       end
     end
+
 
 
 endmodule
