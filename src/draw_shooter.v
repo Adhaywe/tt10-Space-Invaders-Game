@@ -1,5 +1,5 @@
 `default_nettype none
-module draw_shooter #(parameter SHSIZE=16) (
+module draw_shooter (
     input  wire [9:0] pix_x,
     input  wire [9:0] pix_y,
     input  wire [9:0] shooter_left_x,
@@ -14,10 +14,7 @@ module draw_shooter #(parameter SHSIZE=16) (
 
     wire [3:0] row_addr = y_off[3:0];
     wire [15:0] row_bits;
-    shooter_rom srom(
-        .row_index(row_addr),
-        .row_data(row_bits)
-    );
+    shooter_rom srom(.row_index(row_addr), .row_data(row_bits));
 
     wire [3:0] col_addr = x_off[3:0];
     wire bit_on = row_bits[col_addr];
