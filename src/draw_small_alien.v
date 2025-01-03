@@ -1,5 +1,5 @@
 `default_nettype none
-module draw_small_alien #(parameter ALIASIZE=16) (
+module draw_small_alien (
     input  wire [9:0] pix_x,
     input  wire [9:0] pix_y,
     input  wire [9:0] alien_left_x,

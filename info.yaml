@@ -27,7 +27,6 @@ project:
     - "medium_alien_rom.v"
     - "shooter_rom.v"
     - "small_alien_rom.v"
-    - "shooter_rom.v" 
     - "small_alien_rom.v"
     - "barrier_rom.v" 
     - "draw_barrier.v"
