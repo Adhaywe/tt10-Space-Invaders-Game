@@ -27,6 +27,10 @@ project:
     - "medium_alien_rom.v"
     - "shooter_rom.v"
     - "small_alien_rom.v"
+    - "shooter_rom.v" 
+    - "small_alien_rom.v"
+    - "barrier_rom.v" 
+    - "draw_barrier.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
