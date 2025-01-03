@@ -445,14 +445,9 @@ module tt_um_space_invaders_game (
     wire any_barrier_on = (barrier1_visible || barrier2_visible || barrier3_visible || barrier4_visible);
 
     //----------------------------------------------------
-    // *** NEW *** 12) Multiple Player Bullets + Alien Bullet
+    //  Multiple Player Bullets + Alien Bullet
     //----------------------------------------------------
 
-    // ==========  Player Bullets (white), up to 4 ==========
-    // We’ll store 4 bullets in parallel, each can be active or not.
-    // Each bullet => pb_active[i], pb_x[i], pb_y[i].
-    // On a rising edge of button #2, we spawn a new bullet in the
-    // first inactive slot.
 
     reg [3:0] pb_active;  // bullet_active flags for 4 bullets
     reg [9:0] pb_x [0:3];
@@ -460,117 +455,13 @@ module tt_um_space_invaders_game (
 
     // For detecting rising edge of ui_in[2].
     reg prev_button2;
-
-    // We move them once per frame (like your old code).
-    always @(posedge clk) begin
-      if (~rst_n) begin
-        pb_active <= 4'b0000;
-        pb_x[0] <= 0;  pb_y[0] <= 0;
-        pb_x[1] <= 0;  pb_y[1] <= 0;
-        pb_x[2] <= 0;  pb_y[2] <= 0;
-        pb_x[3] <= 0;  pb_y[3] <= 0;
-        prev_button2 <= 0;
-      end else begin
-        // Detect rising edge of button #2 each clock:
-        if (!prev_button2 && ui_in[2]) begin
-          // Attempt to spawn bullet in an empty slot:
-          if (!pb_active[0]) begin
-            pb_active[0] <= 1;
-            pb_x[0] <= shooter_x + 8;
-            pb_y[0] <= SHOOTER_Y - 6;
-          end else if (!pb_active[1]) begin
-            pb_active[1] <= 1;
-            pb_x[1] <= shooter_x + 8;
-            pb_y[1] <= SHOOTER_Y - 6;
-          end else if (!pb_active[2]) begin
-            pb_active[2] <= 1;
-            pb_x[2] <= shooter_x + 8;
-            pb_y[2] <= SHOOTER_Y - 6;
-          end else if (!pb_active[3]) begin
-            pb_active[3] <= 1;
-            pb_x[3] <= shooter_x + 8;
-            pb_y[3] <= SHOOTER_Y - 6;
-          end
-          // else: no free slot => ignore
-        end
-        prev_button2 <= ui_in[2];
-
-        // Once per frame: move active bullets up
-        if (pix_y == 0 && prev_vpos != 0) begin
-          // Bullet 0
-          if (pb_active[0]) begin
-              if (pb_y[0] > 100)
-                  pb_y[0] <= pb_y[0] - 15;
-              else
-                  pb_active[0] <= 0; // vanish
-          end
-          // Bullet 1
-          if (pb_active[1]) begin
-              if (pb_y[1] > 100)
-                  pb_y[1] <= pb_y[1] - 10;
-              else
-                  pb_active[1] <= 0; // vanish
-          end
-          // Bullet 2
-          if (pb_active[2]) begin
-              if (pb_y[2] > 100)
-                  pb_y[2] <= pb_y[2] - 10;
-              else
-                  pb_active[2] <= 0; // vanish
-          end
-          // Bullet 3
-          if (pb_active[3]) begin
-              if (pb_y[3] > 100)
-                  pb_y[3] <= pb_y[3] - 10;
-              else
-                  pb_active[3] <= 0; // vanish
-          end
-
-          // Alien Bullet Movement
-          if (abullet_active) begin
-              if (abullet_y < 430)
-                  abullet_y <= abullet_y + 18; 
-              else
-                  abullet_active <= 0; 
-          end
-        end
-      end
-    end
-
-    // Draw them (2×6). We'll do 4 separate signals, then combine them.
-    wire bullet0_on = pb_active[0] &&
-                      (pix_x >= pb_x[0]) && (pix_x < pb_x[0] + 2) &&
-                      (pix_y >= pb_y[0]) && (pix_y < pb_y[0] + 6);
-
-    wire bullet1_on = pb_active[1] &&
-                      (pix_x >= pb_x[1]) && (pix_x < pb_x[1] + 2) &&
-                      (pix_y >= pb_y[1]) && (pix_y < pb_y[1] + 6);
-
-    wire bullet2_on = pb_active[2] &&
-                      (pix_x >= pb_x[2]) && (pix_x < pb_x[2] + 2) &&
-                      (pix_y >= pb_y[2]) && (pix_y < pb_y[2] + 6);
-
-    wire bullet3_on = pb_active[3] &&
-                      (pix_x >= pb_x[3]) && (pix_x < pb_x[3] + 2) &&
-                      (pix_y >= pb_y[3]) && (pix_y < pb_y[3] + 6);
-
-    // Combined “player bullet on” signal if ANY bullet is on at pixel
-    wire bullet_on = (bullet0_on || bullet1_on || bullet2_on || bullet3_on);
-
-
-    // ========== Alien Bullet (red) ==========
-
-    reg        abullet_active;
+    reg abullet_active;
     reg [9:0]  abullet_x, abullet_y;
 
     // Minimal LFSR for randomness
     reg [7:0] lfsr;
-    wire      lfsr_feedback = lfsr[7] ^ lfsr[5] ^ lfsr[4] ^ lfsr[3];
+    wire lfsr_feedback = lfsr[7] ^ lfsr[5] ^ lfsr[4] ^ lfsr[3];
 
-    // We'll pick a random row among 5 => 0..4 => small, medY1, medY2, large1, large2.
-    // We'll pick a random col among 0..7 => which alien column.
-    // simple approach: rowRand = (lfsr[3:1] % 5). We'll clamp it to 0..4.
-    // colRand = lfsr[6:4] => 0..7
 
     // Declare new signals to avoid naming conflicts
     reg [2:0] selectedRowRand;
@@ -582,56 +473,6 @@ module tt_um_space_invaders_game (
     wire [9:0] rowY_2 = MEDIUM_Y2 + 8;
     wire [9:0] rowY_3 = LARGE_Y1  + 8;
     wire [9:0] rowY_4 = LARGE_Y2  + 8;
-
-    always @(posedge clk) begin
-      if (~rst_n) begin
-        lfsr <= 8'hA5;
-        abullet_active <= 0;
-        abullet_x <= 0;
-        abullet_y <= 0;
-        selectedRowRand <= 0;
-        colRand <= 0;
-      end else begin
-        // shift LFSR once per frame for randomness and check bullet spawn
-        if (pix_y == 0 && prev_vpos != 0) begin
-          lfsr <= {lfsr[6:0], lfsr_feedback};
-
-          if (!abullet_active) begin
-            // random chance to fire => if lfsr[0] = 1
-            if (lfsr[0]) begin
-              abullet_active <= 1;
-
-              // Extract rowRand and colRand from LFSR
-              selectedRowRand <= lfsr[3:1];
-              if (selectedRowRand > 3'd4) selectedRowRand <= 3'd4;
-              colRand <= lfsr[6:4]; // 0..7
-
-              // Calculate bullet position based on random row and column
-              abullet_x <= group_x + (colRand * (SMALL_SIZE + ALIEN_SPACING)) + 8;
-              abullet_y <= (selectedRowRand == 3'd0) ? rowY_0 :
-                           (selectedRowRand == 3'd1) ? rowY_1 :
-                           (selectedRowRand == 3'd2) ? rowY_2 :
-                           (selectedRowRand == 3'd3) ? rowY_3 :
-                                                       rowY_4; 
-            end
-          end 
-        end
-      end
-    end
-
-    // draw alien bullet (2 wide x 6 tall, red)
-    wire abullet_on;
-    localparam BULLET_W = 2;
-    localparam BULLET_H = 6;
-    assign abullet_on = abullet_active &&
-                        (pix_x >= abullet_x) && (pix_x < abullet_x + BULLET_W) &&
-                        (pix_y >= abullet_y) && (pix_y < abullet_y + BULLET_H);
-
-
-    //----------------------------------------------------
-    // *** NEW *** 13) Collision Detection
-    //----------------------------------------------------
-    // Shooter Bounding Box Parameters
     localparam SHOOTER_WIDTH  = 16; // Adjust as per your shooter design
     localparam SHOOTER_HEIGHT = 16;
 
@@ -639,13 +480,24 @@ module tt_um_space_invaders_game (
     localparam BARRIER_WIDTH  = 32;
     localparam BARRIER_HEIGHT = 16;
     reg [9:0] score;
-    // Collision Detection for Player Bullets vs. Aliens and Barriers
-    // Player Bullets: 4 bullets, Aliens: 5 rows x 8 cols, Barriers: 4
 
-    // Player Bullet 0
+
+    // We move them once per frame (like your old code).
     always @(posedge clk) begin
-        if (~rst_n) begin
-           
+      if (~rst_n) begin
+        pb_active <= 4'b0000;
+        pb_x[0] <= 0;  pb_y[0] <= 0;
+        pb_x[1] <= 0;  pb_y[1] <= 0;
+        pb_x[2] <= 0;  pb_y[2] <= 0;
+        pb_x[3] <= 0;  pb_y[3] <= 0;
+        prev_button2 <= 0;
+	      lfsr <= 8'hA5;
+        abullet_active <= 0;
+        abullet_x <= 0;
+        abullet_y <= 0;
+        selectedRowRand <= 0;
+        colRand <= 0;
+            
         // Initialize Aliens as alive
         aliens_alive[0][0] <= 1'b1;
         aliens_alive[0][1] <= 1'b1;
@@ -698,9 +550,139 @@ module tt_um_space_invaders_game (
         barrier_health[2] <= 3'd5;
         barrier_health[3] <= 3'd5;
 
-            //
-        end else begin
-              if (pix_y == 0 && prev_vpos != 0) begin
+      end else begin
+        // Detect rising edge of button #2 each clock:
+        if (!prev_button2 && ui_in[2]) begin
+          // Attempt to spawn bullet in an empty slot:
+          if (!pb_active[0]) begin
+            pb_active[0] <= 1;
+            pb_x[0] <= shooter_x + 8;
+            pb_y[0] <= SHOOTER_Y - 6;
+          end else if (!pb_active[1]) begin
+            pb_active[1] <= 1;
+            pb_x[1] <= shooter_x + 8;
+            pb_y[1] <= SHOOTER_Y - 6;
+          end else if (!pb_active[2]) begin
+            pb_active[2] <= 1;
+            pb_x[2] <= shooter_x + 8;
+            pb_y[2] <= SHOOTER_Y - 6;
+          end else if (!pb_active[3]) begin
+            pb_active[3] <= 1;
+            pb_x[3] <= shooter_x + 8;
+            pb_y[3] <= SHOOTER_Y - 6;
+          end
+          // else: no free slot => ignore
+        end
+        prev_button2 <= ui_in[2];
+
+        // Once per frame: move active bullets up
+        if (pix_y == 0 && prev_vpos != 0) begin
+		      lfsr <= {lfsr[6:0], lfsr_feedback};
+          // Bullet 0
+          if (pb_active[0]) begin
+              if (pb_y[0] > 100)
+                  pb_y[0] <= pb_y[0] - 15;
+              else
+                  pb_active[0] <= 0; // vanish
+          end
+          // Bullet 1
+          if (pb_active[1]) begin
+              if (pb_y[1] > 100)
+                  pb_y[1] <= pb_y[1] - 10;
+              else
+                  pb_active[1] <= 0; // vanish
+          end
+          // Bullet 2
+          if (pb_active[2]) begin
+              if (pb_y[2] > 100)
+                  pb_y[2] <= pb_y[2] - 10;
+              else
+                  pb_active[2] <= 0; // vanish
+          end
+          // Bullet 3
+          if (pb_active[3]) begin
+              if (pb_y[3] > 100)
+                  pb_y[3] <= pb_y[3] - 10;
+              else
+                  pb_active[3] <= 0; // vanish
+          end
+
+          // Alien Bullet Movement
+          if (abullet_active) begin
+              if (abullet_y < 430)
+                  abullet_y <= abullet_y + 18; 
+              else 
+                 abullet_active <= 0;
+
+              if (
+                        abullet_x + BULLET_W > shooter_x &&
+                        abullet_x < shooter_x + SHOOTER_WIDTH &&
+                        abullet_y + BULLET_H > SHOOTER_Y &&
+                        abullet_y < SHOOTER_Y + SHOOTER_HEIGHT
+                    ) begin
+                        shooter_lives <= shooter_lives - 1;
+                        abullet_active <= 0; 
+                    end
+              if (barrier_health[0] > 0 &&
+                        abullet_x + BULLET_W > b1_xpos &&
+                        abullet_x < b1_xpos + BARRIER_WIDTH &&
+                        abullet_y + BULLET_H > BARRIER_Y &&
+                        abullet_y < BARRIER_Y + BARRIER_HEIGHT) begin
+                            barrier_health[0] <= barrier_health[0] - 1;
+                            abullet_active <= 0;
+                    end
+
+                    // Barrier 1
+              if (barrier_health[1] > 0 &&
+                        abullet_x + BULLET_W > b2_xpos &&
+                        abullet_x < b2_xpos + BARRIER_WIDTH &&
+                        abullet_y + BULLET_H > BARRIER_Y &&
+                        abullet_y < BARRIER_Y + BARRIER_HEIGHT) begin
+                            barrier_health[1] <= barrier_health[1] - 1;
+                            abullet_active <= 0;
+                    end
+
+                    // Barrier 2
+              if (barrier_health[2] > 0 &&
+                        abullet_x + BULLET_W > b3_xpos &&
+                        abullet_x < b3_xpos + BARRIER_WIDTH &&
+                        abullet_y + BULLET_H > BARRIER_Y &&
+                        abullet_y < BARRIER_Y + BARRIER_HEIGHT) begin
+                            barrier_health[2] <= barrier_health[2] - 1;
+                            abullet_active <= 0;
+                    end
+
+                    // Barrier 3
+              if (barrier_health[3] > 0 &&
+                        abullet_x + BULLET_W > b4_xpos &&
+                        abullet_x < b4_xpos + BARRIER_WIDTH &&
+                        abullet_y + BULLET_H > BARRIER_Y &&
+                        abullet_y < BARRIER_Y + BARRIER_HEIGHT) begin
+                            barrier_health[3] <= barrier_health[3] - 1;
+                            abullet_active <= 0;
+                    end
+          end
+		      else begin
+			        if (lfsr[0]) begin
+              abullet_active <= 1;
+
+              // Extract rowRand and colRand from LFSR
+              selectedRowRand <= lfsr[3:1];
+              if (selectedRowRand > 3'd4) selectedRowRand <= 3'd4;
+              colRand <= lfsr[6:4]; // 0..7
+
+              // Calculate bullet position based on random row and column
+              abullet_x <= group_x + (colRand * (SMALL_SIZE + ALIEN_SPACING)) + 8;
+              abullet_y <= (selectedRowRand == 3'd0) ? rowY_0 :
+                           (selectedRowRand == 3'd1) ? rowY_1 :
+                           (selectedRowRand == 3'd2) ? rowY_2 :
+                           (selectedRowRand == 3'd3) ? rowY_3 :
+                                                       rowY_4; 
+		    end
+		  end
+    end
+
+    if (pix_y == 0 && prev_vpos != 0) begin
                 if (pb_active[0]) begin
                     if (aliens_alive[0][0] &&
                         pb_x[0] + BULLET_W > s1_x &&
@@ -2560,81 +2542,44 @@ module tt_um_space_invaders_game (
                             barrier_health[3] <= barrier_health[3] - 1;
                             pb_active[3] <= 0;
                     end
-                end
-         
-
-
-   
-              end
-        end
+      end
     end
-   
-    //----------------------------------------------------
-    // Alien Bullet vs. Shooter and Barriers Collision
-    //----------------------------------------------------
-    always @(posedge clk) begin
-        if (~rst_n) begin
-            // Reset handled earlier
-        end else begin
-            if (pix_y == 0 && prev_vpos != 0) begin
-                if (abullet_active) begin
-                    // Check collision with Shooter
-                    if (
-                        abullet_x + BULLET_W > shooter_x &&
-                        abullet_x < shooter_x + SHOOTER_WIDTH &&
-                        abullet_y + BULLET_H > SHOOTER_Y &&
-                        abullet_y < SHOOTER_Y + SHOOTER_HEIGHT
-                    ) begin
-                        shooter_lives <= shooter_lives - 1;
-                        abullet_active <= 0;
-                        // Optional: Handle game over if shooter_lives == 0
-                    end
+  end
+end
 
-                    // Check collision with Barriers
-                    // Barrier 0
-                    if (barrier_health[0] > 0 &&
-                        abullet_x + BULLET_W > b1_xpos &&
-                        abullet_x < b1_xpos + BARRIER_WIDTH &&
-                        abullet_y + BULLET_H > BARRIER_Y &&
-                        abullet_y < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[0] <= barrier_health[0] - 1;
-                            abullet_active <= 0;
-                    end
+// draw alien bullet (2 wide x 6 tall, red)
+    wire abullet_on;
+    localparam BULLET_W = 2;
+    localparam BULLET_H = 6;
+    assign abullet_on = abullet_active &&
+                        (pix_x >= abullet_x) && (pix_x < abullet_x + BULLET_W) &&
+                        (pix_y >= abullet_y) && (pix_y < abullet_y + BULLET_H);
 
-                    // Barrier 1
-                    if (barrier_health[1] > 0 &&
-                        abullet_x + BULLET_W > b2_xpos &&
-                        abullet_x < b2_xpos + BARRIER_WIDTH &&
-                        abullet_y + BULLET_H > BARRIER_Y &&
-                        abullet_y < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[1] <= barrier_health[1] - 1;
-                            abullet_active <= 0;
-                    end
 
-                    // Barrier 2
-                    if (barrier_health[2] > 0 &&
-                        abullet_x + BULLET_W > b3_xpos &&
-                        abullet_x < b3_xpos + BARRIER_WIDTH &&
-                        abullet_y + BULLET_H > BARRIER_Y &&
-                        abullet_y < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[2] <= barrier_health[2] - 1;
-                            abullet_active <= 0;
-                    end
+    // Draw them (2×6). We'll do 4 separate signals, then combine them.
+    wire bullet0_on = pb_active[0] &&
+                      (pix_x >= pb_x[0]) && (pix_x < pb_x[0] + 2) &&
+                      (pix_y >= pb_y[0]) && (pix_y < pb_y[0] + 6);
 
-                    // Barrier 3
-                    if (barrier_health[3] > 0 &&
-                        abullet_x + BULLET_W > b4_xpos &&
-                        abullet_x < b4_xpos + BARRIER_WIDTH &&
-                        abullet_y + BULLET_H > BARRIER_Y &&
-                        abullet_y < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[3] <= barrier_health[3] - 1;
-                            abullet_active <= 0;
-                    end
-                end
-            end
-        end
-    end
+    wire bullet1_on = pb_active[1] &&
+                      (pix_x >= pb_x[1]) && (pix_x < pb_x[1] + 2) &&
+                      (pix_y >= pb_y[1]) && (pix_y < pb_y[1] + 6);
 
+    wire bullet2_on = pb_active[2] &&
+                      (pix_x >= pb_x[2]) && (pix_x < pb_x[2] + 2) &&
+                      (pix_y >= pb_y[2]) && (pix_y < pb_y[2] + 6);
+
+    wire bullet3_on = pb_active[3] &&
+                      (pix_x >= pb_x[3]) && (pix_x < pb_x[3] + 2) &&
+                      (pix_y >= pb_y[3]) && (pix_y < pb_y[3] + 6);
+
+    // Combined “player bullet on” signal if ANY bullet is on at pixel
+    wire bullet_on = (bullet0_on || bullet1_on || bullet2_on || bullet3_on);
+
+
+    
+  
+ 
     //----------------------------------------------------
     // 14) Final Color Priority with Collision Effects
     //----------------------------------------------------
