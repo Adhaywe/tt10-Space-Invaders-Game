@@ -27,7 +27,7 @@ module tt_um_space_invaders_game (
     // Unused I/O
     assign uio_out = 0;
     assign uio_oe  = 0;
-    wire _unused_ok = &{ena, ui_in, uio_in};
+    wire _unused_ok = &{ena, ui_in[7:4], uio_in};
 
     // Minimal VGA generator
     vga_sync_generator sync_gen (
@@ -339,6 +339,50 @@ module tt_um_space_invaders_game (
          lB7_on && aliens_alive[4][6] || 
          lB8_on && aliens_alive[4][7]);
 
+
+  //-----------------------------------------
+
+  localparam DIGIT_WIDTH = 10;
+  localparam DIGIT_HEIGHT = 14;
+  localparam DIGIT2_X = 30;   // Hundreds place
+  localparam DIGIT1_X = 60;   // Tens place
+  localparam DIGIT0_X = 90;   // Ones place
+  localparam DIGIT_Y = 20;    // Y position for all digits
+  localparam TROPHY_X = 130; // 12 pixels padding
+  localparam TROPHY_Y = DIGIT_Y - 3;                // Align Y position with scoreboard
+
+  localparam HEART_X =  390;  // Position of the heart to the left of the score
+  localparam HEART_Y = DIGIT_Y + 1;  
+
+  wire pixel_on_heart;
+  draw_heart draw_heart_inst (
+      .pix_x(pix_x),
+      .pix_y(pix_y),
+      .heart_left_x(HEART_X),
+      .heart_top_y(HEART_Y),
+      .pixel_on(pixel_on_heart)
+  );
+
+
+  // Instantiate Trophy Drawing Module
+  wire pixel_on_trophy;
+  draw_trophy draw_trophy_inst (
+      .pix_x(pix_x),
+      .pix_y(pix_y),
+      .trophy_left_x(TROPHY_X),
+      .trophy_top_y(TROPHY_Y),
+      .pixel_on(pixel_on_trophy)
+  );
+
+
+  //wire final_pixel_on;
+  //assign final_pixel_on = pixel_on_heart | pixel_on_trophy;
+
+
+
+
+
+
     //----------------------------------------------------
     // 8) Shooter Movement Direction
     //----------------------------------------------------
@@ -480,8 +524,11 @@ module tt_um_space_invaders_game (
     localparam BARRIER_WIDTH  = 32;
     localparam BARRIER_HEIGHT = 16;
     reg [9:0] score;
+    reg game_over;
+    reg game_won;
 
 
+    
     // We move them once per frame (like your old code).
     always @(posedge clk) begin
       if (~rst_n) begin
@@ -497,7 +544,7 @@ module tt_um_space_invaders_game (
         abullet_y <= 0;
         selectedRowRand <= 0;
         colRand <= 0;
-            
+        shooter_lives <= 3;
         // Initialize Aliens as alive
         aliens_alive[0][0] <= 1'b1;
         aliens_alive[0][1] <= 1'b1;
@@ -620,8 +667,11 @@ module tt_um_space_invaders_game (
                         abullet_y + BULLET_H > SHOOTER_Y &&
                         abullet_y < SHOOTER_Y + SHOOTER_HEIGHT
                     ) begin
-                        shooter_lives <= shooter_lives - 1;
+                        
                         abullet_active <= 0; 
+						if (shooter_lives > 0) begin
+						   shooter_lives <= shooter_lives - 1;
+						end
                     end
               if (barrier_health[0] > 0 &&
                         abullet_x + BULLET_W > b1_xpos &&
@@ -680,6 +730,14 @@ module tt_um_space_invaders_game (
                                                        rowY_4; 
 		    end
 		  end
+		  
+		  if (shooter_lives == 0) begin
+		      game_over <= 1;
+		  end
+      else begin
+          game_over <= 0;
+      end
+		  
     end
 
     if (pix_y == 0 && prev_vpos != 0) begin
@@ -2544,8 +2602,159 @@ module tt_um_space_invaders_game (
                     end
       end
     end
+
+    if (score == 720) begin
+      game_won <= 1;
+    end
+    else begin
+      game_won <= 0;
+    end
   end
 end
+
+
+// reset logic
+always @(posedge clk) begin
+    if (~rst_n || ui_in[3]) begin
+        pb_active <= 4'b0000;
+        pb_x[0] <= 0;  pb_y[0] <= 0;
+        pb_x[1] <= 0;  pb_y[1] <= 0;
+        pb_x[2] <= 0;  pb_y[2] <= 0;
+        pb_x[3] <= 0;  pb_y[3] <= 0;
+        prev_button2 <= 0;
+	      lfsr <= 8'hA5;
+        abullet_active <= 0;
+        abullet_x <= 0;
+        abullet_y <= 0;
+        selectedRowRand <= 0;
+        colRand <= 0;
+        score <= 0;
+        shooter_lives <= 3;
+        shooter_x <= 255;
+        aliens_alive[0][0] <= 1'b1;
+        aliens_alive[0][1] <= 1'b1;
+        aliens_alive[0][2] <= 1'b1;
+        aliens_alive[0][3] <= 1'b1;
+        aliens_alive[0][4] <= 1'b1;
+        aliens_alive[0][5] <= 1'b1;
+        aliens_alive[0][6] <= 1'b1;
+        aliens_alive[0][7] <= 1'b1;
+        
+        aliens_alive[1][0] <= 1'b1;
+        aliens_alive[1][1] <= 1'b1;
+        aliens_alive[1][2] <= 1'b1;
+        aliens_alive[1][3] <= 1'b1;
+        aliens_alive[1][4] <= 1'b1;
+        aliens_alive[1][5] <= 1'b1;
+        aliens_alive[1][6] <= 1'b1;
+        aliens_alive[1][7] <= 1'b1;
+        
+        aliens_alive[2][0] <= 1'b1;
+        aliens_alive[2][1] <= 1'b1;
+        aliens_alive[2][2] <= 1'b1;
+        aliens_alive[2][3] <= 1'b1;
+        aliens_alive[2][4] <= 1'b1;
+        aliens_alive[2][5] <= 1'b1;
+        aliens_alive[2][6] <= 1'b1;
+        aliens_alive[2][7] <= 1'b1;
+        
+        aliens_alive[3][0] <= 1'b1;
+        aliens_alive[3][1] <= 1'b1;
+        aliens_alive[3][2] <= 1'b1;
+        aliens_alive[3][3] <= 1'b1;
+        aliens_alive[3][4] <= 1'b1;
+        aliens_alive[3][5] <= 1'b1;
+        aliens_alive[3][6] <= 1'b1;
+        aliens_alive[3][7] <= 1'b1;
+        
+        aliens_alive[4][0] <= 1'b1;
+        aliens_alive[4][1] <= 1'b1;
+        aliens_alive[4][2] <= 1'b1;
+        aliens_alive[4][3] <= 1'b1;
+        aliens_alive[4][4] <= 1'b1;
+        aliens_alive[4][5] <= 1'b1;
+        aliens_alive[4][6] <= 1'b1;
+        aliens_alive[4][7] <= 1'b1;
+
+        // Initialize Barriers Health to 5
+        barrier_health[0] <= 3'd5;
+        barrier_health[1] <= 3'd5;
+        barrier_health[2] <= 3'd5;
+        barrier_health[3] <= 3'd5;
+
+    end
+
+    else if (game_over || game_won) begin
+      pb_active <= 4'b0000;
+        pb_x[0] <= 0;  pb_y[0] <= 0;
+        pb_x[1] <= 0;  pb_y[1] <= 0;
+        pb_x[2] <= 0;  pb_y[2] <= 0;
+        pb_x[3] <= 0;  pb_y[3] <= 0;
+        prev_button2 <= 0;
+	      lfsr <= 8'hA5;
+        abullet_active <= 0;
+        abullet_x <= 0;
+        abullet_y <= 0;
+        selectedRowRand <= 0;
+        colRand <= 0;
+        score <= 0;
+        shooter_lives <= 3;
+        shooter_x <= 255;
+        aliens_alive[0][0] <= 1'b1;
+        aliens_alive[0][1] <= 1'b1;
+        aliens_alive[0][2] <= 1'b1;
+        aliens_alive[0][3] <= 1'b1;
+        aliens_alive[0][4] <= 1'b1;
+        aliens_alive[0][5] <= 1'b1;
+        aliens_alive[0][6] <= 1'b1;
+        aliens_alive[0][7] <= 1'b1;
+        
+        aliens_alive[1][0] <= 1'b1;
+        aliens_alive[1][1] <= 1'b1;
+        aliens_alive[1][2] <= 1'b1;
+        aliens_alive[1][3] <= 1'b1;
+        aliens_alive[1][4] <= 1'b1;
+        aliens_alive[1][5] <= 1'b1;
+        aliens_alive[1][6] <= 1'b1;
+        aliens_alive[1][7] <= 1'b1;
+        
+        aliens_alive[2][0] <= 1'b1;
+        aliens_alive[2][1] <= 1'b1;
+        aliens_alive[2][2] <= 1'b1;
+        aliens_alive[2][3] <= 1'b1;
+        aliens_alive[2][4] <= 1'b1;
+        aliens_alive[2][5] <= 1'b1;
+        aliens_alive[2][6] <= 1'b1;
+        aliens_alive[2][7] <= 1'b1;
+        
+        aliens_alive[3][0] <= 1'b1;
+        aliens_alive[3][1] <= 1'b1;
+        aliens_alive[3][2] <= 1'b1;
+        aliens_alive[3][3] <= 1'b1;
+        aliens_alive[3][4] <= 1'b1;
+        aliens_alive[3][5] <= 1'b1;
+        aliens_alive[3][6] <= 1'b1;
+        aliens_alive[3][7] <= 1'b1;
+        
+        aliens_alive[4][0] <= 1'b1;
+        aliens_alive[4][1] <= 1'b1;
+        aliens_alive[4][2] <= 1'b1;
+        aliens_alive[4][3] <= 1'b1;
+        aliens_alive[4][4] <= 1'b1;
+        aliens_alive[4][5] <= 1'b1;
+        aliens_alive[4][6] <= 1'b1;
+        aliens_alive[4][7] <= 1'b1;
+
+        // Initialize Barriers Health to 5
+        barrier_health[0] <= 3'd5;
+        barrier_health[1] <= 3'd5;
+        barrier_health[2] <= 3'd5;
+        barrier_health[3] <= 3'd5;
+    end
+end
+
+
+
 
 // draw alien bullet (2 wide x 6 tall, red)
     wire abullet_on;
@@ -2576,8 +2785,18 @@ end
     // Combined “player bullet on” signal if ANY bullet is on at pixel
     wire bullet_on = (bullet0_on || bullet1_on || bullet2_on || bullet3_on);
 
-
     
+    //-----------------------------------
+    wire pixel_on_score;
+   draw_score draw_score_inst (
+        .pix_x(pix_x),                   // Current pixel's X coordinate
+        .pix_y(pix_y),                   // Current pixel's Y coordinate
+        .score(score),               // Player's current score
+        .shooter_lives(shooter_lives), // Shooter's current lives
+        .pixel_on(pixel_on_score)        // Output: Pixel part of score or health display
+    );
+
+    //----------------------------------
   
  
     //----------------------------------------------------
@@ -2590,6 +2809,9 @@ end
     wire [5:0] color_barrier = 6'b011101; 
     wire [5:0] color_bullet  = 6'b111111; 
     wire [5:0] color_alien_bullet = 6'b110000; 
+    wire [5:0] color_trophy = 6'b101001;
+    wire [5:0] color_heart = 6'b110010;
+    wire [5:0] color_score  = 6'b111111;
 
     always @(posedge clk) begin
       if (~rst_n) begin
@@ -2604,7 +2826,22 @@ end
 
         if (video_active) begin
           // Priority: alien bullet > player bullets > shooter > barrier > large > medium > small
-          if (abullet_on) begin
+          if (pixel_on_score) begin
+            R <= color_score[5:4];
+            G <= color_score[3:2];
+            B <= color_score[1:0];
+          end
+          else if (pixel_on_trophy) begin
+            R <= color_trophy[5:4];
+            G <= color_trophy[3:2];
+            B <= color_trophy[1:0];
+          end
+          else if (pixel_on_heart) begin
+            R <= color_heart[5:4];
+            G <= color_heart[3:2];
+            B <= color_heart[1:0];
+          end
+          else if (abullet_on) begin
             R <= color_alien_bullet[5:4];
             G <= color_alien_bullet[3:2];
             B <= color_alien_bullet[1:0];
