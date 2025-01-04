@@ -27,7 +27,7 @@ module tt_um_space_invaders_game  (
     // Unused I/O
     assign uio_out = 0;
     assign uio_oe  = 0;
-    wire _unused_ok = &{ena, ui_in[7:4], uio_in};
+    wire _unused_ok = &{ena, ui_in[7:3], uio_in};
 
     // Minimal VGA generator
     vga_sync_generator sync_gen (
@@ -431,7 +431,16 @@ module tt_um_space_invaders_game  (
         if (~rst_n) begin
             shooter_x <= 255;
             prev_vpos_shooter <= 0;
-        end else begin
+        end 
+        else if (game_over) begin
+            shooter_x <= 255;
+            prev_vpos_shooter <= 0;
+        end
+        else if (game_won) begin
+            shooter_x <= 255;
+            prev_vpos_shooter <= 0;
+        end
+        else begin
             // Update once per frame
             prev_vpos_shooter <= pix_y;
             if (pix_y == 0 && prev_vpos_shooter != 0) begin
@@ -613,7 +622,6 @@ module tt_um_space_invaders_game  (
         colRand <= 0;
         score <= 0;
         shooter_lives <= 3;
-        shooter_x <= 255;
         aliens_alive[0][0] <= 1'b1;
         aliens_alive[0][1] <= 1'b1;
         aliens_alive[0][2] <= 1'b1;
@@ -680,7 +688,6 @@ module tt_um_space_invaders_game  (
         colRand <= 0;
         score <= 0;
         shooter_lives <= 3;
-        shooter_x <= 255;
         aliens_alive[0][0] <= 1'b1;
         aliens_alive[0][1] <= 1'b1;
         aliens_alive[0][2] <= 1'b1;
