@@ -2,7 +2,7 @@
 //---------------------------------------------
 // Top-level module
 //---------------------------------------------
-module tt_um_space_invaders_game (
+module tt_um_space_invaders_game  (
     input  wire [7:0] ui_in,
     output wire [7:0] uo_out,
     input  wire [7:0] uio_in,
@@ -597,7 +597,142 @@ module tt_um_space_invaders_game (
         barrier_health[2] <= 3'd5;
         barrier_health[3] <= 3'd5;
 
-      end else begin
+      end 
+       else if (game_won) begin
+      pb_active <= 4'b0000;
+        pb_x[0] <= 0;  pb_y[0] <= 0;
+        pb_x[1] <= 0;  pb_y[1] <= 0;
+        pb_x[2] <= 0;  pb_y[2] <= 0;
+        pb_x[3] <= 0;  pb_y[3] <= 0;
+        prev_button2 <= 0;
+	      lfsr <= 8'hA5;
+        abullet_active <= 0;
+        abullet_x <= 0;
+        abullet_y <= 0;
+        selectedRowRand <= 0;
+        colRand <= 0;
+        score <= 0;
+        shooter_lives <= 3;
+        shooter_x <= 255;
+        aliens_alive[0][0] <= 1'b1;
+        aliens_alive[0][1] <= 1'b1;
+        aliens_alive[0][2] <= 1'b1;
+        aliens_alive[0][3] <= 1'b1;
+        aliens_alive[0][4] <= 1'b1;
+        aliens_alive[0][5] <= 1'b1;
+        aliens_alive[0][6] <= 1'b1;
+        aliens_alive[0][7] <= 1'b1;
+        
+        aliens_alive[1][0] <= 1'b1;
+        aliens_alive[1][1] <= 1'b1;
+        aliens_alive[1][2] <= 1'b1;
+        aliens_alive[1][3] <= 1'b1;
+        aliens_alive[1][4] <= 1'b1;
+        aliens_alive[1][5] <= 1'b1;
+        aliens_alive[1][6] <= 1'b1;
+        aliens_alive[1][7] <= 1'b1;
+        
+        aliens_alive[2][0] <= 1'b1;
+        aliens_alive[2][1] <= 1'b1;
+        aliens_alive[2][2] <= 1'b1;
+        aliens_alive[2][3] <= 1'b1;
+        aliens_alive[2][4] <= 1'b1;
+        aliens_alive[2][5] <= 1'b1;
+        aliens_alive[2][6] <= 1'b1;
+        aliens_alive[2][7] <= 1'b1;
+        
+        aliens_alive[3][0] <= 1'b1;
+        aliens_alive[3][1] <= 1'b1;
+        aliens_alive[3][2] <= 1'b1;
+        aliens_alive[3][3] <= 1'b1;
+        aliens_alive[3][4] <= 1'b1;
+        aliens_alive[3][5] <= 1'b1;
+        aliens_alive[3][6] <= 1'b1;
+        aliens_alive[3][7] <= 1'b1;
+        
+        aliens_alive[4][0] <= 1'b1;
+        aliens_alive[4][1] <= 1'b1;
+        aliens_alive[4][2] <= 1'b1;
+        aliens_alive[4][3] <= 1'b1;
+        aliens_alive[4][4] <= 1'b1;
+        aliens_alive[4][5] <= 1'b1;
+        aliens_alive[4][6] <= 1'b1;
+        aliens_alive[4][7] <= 1'b1;
+
+        // Initialize Barriers Health to 5
+        barrier_health[0] <= 3'd5;
+        barrier_health[1] <= 3'd5;
+        barrier_health[2] <= 3'd5;
+        barrier_health[3] <= 3'd5;
+    end
+    else if (game_over) begin
+      pb_active <= 4'b0000;
+        pb_x[0] <= 0;  pb_y[0] <= 0;
+        pb_x[1] <= 0;  pb_y[1] <= 0;
+        pb_x[2] <= 0;  pb_y[2] <= 0;
+        pb_x[3] <= 0;  pb_y[3] <= 0;
+        prev_button2 <= 0;
+	      lfsr <= 8'hA5;
+        abullet_active <= 0;
+        abullet_x <= 0;
+        abullet_y <= 0;
+        selectedRowRand <= 0;
+        colRand <= 0;
+        score <= 0;
+        shooter_lives <= 3;
+        shooter_x <= 255;
+        aliens_alive[0][0] <= 1'b1;
+        aliens_alive[0][1] <= 1'b1;
+        aliens_alive[0][2] <= 1'b1;
+        aliens_alive[0][3] <= 1'b1;
+        aliens_alive[0][4] <= 1'b1;
+        aliens_alive[0][5] <= 1'b1;
+        aliens_alive[0][6] <= 1'b1;
+        aliens_alive[0][7] <= 1'b1;
+        
+        aliens_alive[1][0] <= 1'b1;
+        aliens_alive[1][1] <= 1'b1;
+        aliens_alive[1][2] <= 1'b1;
+        aliens_alive[1][3] <= 1'b1;
+        aliens_alive[1][4] <= 1'b1;
+        aliens_alive[1][5] <= 1'b1;
+        aliens_alive[1][6] <= 1'b1;
+        aliens_alive[1][7] <= 1'b1;
+        
+        aliens_alive[2][0] <= 1'b1;
+        aliens_alive[2][1] <= 1'b1;
+        aliens_alive[2][2] <= 1'b1;
+        aliens_alive[2][3] <= 1'b1;
+        aliens_alive[2][4] <= 1'b1;
+        aliens_alive[2][5] <= 1'b1;
+        aliens_alive[2][6] <= 1'b1;
+        aliens_alive[2][7] <= 1'b1;
+        
+        aliens_alive[3][0] <= 1'b1;
+        aliens_alive[3][1] <= 1'b1;
+        aliens_alive[3][2] <= 1'b1;
+        aliens_alive[3][3] <= 1'b1;
+        aliens_alive[3][4] <= 1'b1;
+        aliens_alive[3][5] <= 1'b1;
+        aliens_alive[3][6] <= 1'b1;
+        aliens_alive[3][7] <= 1'b1;
+        
+        aliens_alive[4][0] <= 1'b1;
+        aliens_alive[4][1] <= 1'b1;
+        aliens_alive[4][2] <= 1'b1;
+        aliens_alive[4][3] <= 1'b1;
+        aliens_alive[4][4] <= 1'b1;
+        aliens_alive[4][5] <= 1'b1;
+        aliens_alive[4][6] <= 1'b1;
+        aliens_alive[4][7] <= 1'b1;
+
+        // Initialize Barriers Health to 5
+        barrier_health[0] <= 3'd5;
+        barrier_health[1] <= 3'd5;
+        barrier_health[2] <= 3'd5;
+        barrier_health[3] <= 3'd5;
+    end
+      else begin
         // Detect rising edge of button #2 each clock:
         if (!prev_button2 && ui_in[2]) begin
           // Attempt to spawn bullet in an empty slot:
@@ -2613,145 +2748,6 @@ module tt_um_space_invaders_game (
 end
 
 
-// reset logic
-always @(posedge clk) begin
-    if (~rst_n || ui_in[3]) begin
-        pb_active <= 4'b0000;
-        pb_x[0] <= 0;  pb_y[0] <= 0;
-        pb_x[1] <= 0;  pb_y[1] <= 0;
-        pb_x[2] <= 0;  pb_y[2] <= 0;
-        pb_x[3] <= 0;  pb_y[3] <= 0;
-        prev_button2 <= 0;
-	      lfsr <= 8'hA5;
-        abullet_active <= 0;
-        abullet_x <= 0;
-        abullet_y <= 0;
-        selectedRowRand <= 0;
-        colRand <= 0;
-        score <= 0;
-        shooter_lives <= 3;
-        shooter_x <= 255;
-        aliens_alive[0][0] <= 1'b1;
-        aliens_alive[0][1] <= 1'b1;
-        aliens_alive[0][2] <= 1'b1;
-        aliens_alive[0][3] <= 1'b1;
-        aliens_alive[0][4] <= 1'b1;
-        aliens_alive[0][5] <= 1'b1;
-        aliens_alive[0][6] <= 1'b1;
-        aliens_alive[0][7] <= 1'b1;
-        
-        aliens_alive[1][0] <= 1'b1;
-        aliens_alive[1][1] <= 1'b1;
-        aliens_alive[1][2] <= 1'b1;
-        aliens_alive[1][3] <= 1'b1;
-        aliens_alive[1][4] <= 1'b1;
-        aliens_alive[1][5] <= 1'b1;
-        aliens_alive[1][6] <= 1'b1;
-        aliens_alive[1][7] <= 1'b1;
-        
-        aliens_alive[2][0] <= 1'b1;
-        aliens_alive[2][1] <= 1'b1;
-        aliens_alive[2][2] <= 1'b1;
-        aliens_alive[2][3] <= 1'b1;
-        aliens_alive[2][4] <= 1'b1;
-        aliens_alive[2][5] <= 1'b1;
-        aliens_alive[2][6] <= 1'b1;
-        aliens_alive[2][7] <= 1'b1;
-        
-        aliens_alive[3][0] <= 1'b1;
-        aliens_alive[3][1] <= 1'b1;
-        aliens_alive[3][2] <= 1'b1;
-        aliens_alive[3][3] <= 1'b1;
-        aliens_alive[3][4] <= 1'b1;
-        aliens_alive[3][5] <= 1'b1;
-        aliens_alive[3][6] <= 1'b1;
-        aliens_alive[3][7] <= 1'b1;
-        
-        aliens_alive[4][0] <= 1'b1;
-        aliens_alive[4][1] <= 1'b1;
-        aliens_alive[4][2] <= 1'b1;
-        aliens_alive[4][3] <= 1'b1;
-        aliens_alive[4][4] <= 1'b1;
-        aliens_alive[4][5] <= 1'b1;
-        aliens_alive[4][6] <= 1'b1;
-        aliens_alive[4][7] <= 1'b1;
-
-        // Initialize Barriers Health to 5
-        barrier_health[0] <= 3'd5;
-        barrier_health[1] <= 3'd5;
-        barrier_health[2] <= 3'd5;
-        barrier_health[3] <= 3'd5;
-
-    end
-
-    else if (game_over || game_won) begin
-      pb_active <= 4'b0000;
-        pb_x[0] <= 0;  pb_y[0] <= 0;
-        pb_x[1] <= 0;  pb_y[1] <= 0;
-        pb_x[2] <= 0;  pb_y[2] <= 0;
-        pb_x[3] <= 0;  pb_y[3] <= 0;
-        prev_button2 <= 0;
-	      lfsr <= 8'hA5;
-        abullet_active <= 0;
-        abullet_x <= 0;
-        abullet_y <= 0;
-        selectedRowRand <= 0;
-        colRand <= 0;
-        score <= 0;
-        shooter_lives <= 3;
-        shooter_x <= 255;
-        aliens_alive[0][0] <= 1'b1;
-        aliens_alive[0][1] <= 1'b1;
-        aliens_alive[0][2] <= 1'b1;
-        aliens_alive[0][3] <= 1'b1;
-        aliens_alive[0][4] <= 1'b1;
-        aliens_alive[0][5] <= 1'b1;
-        aliens_alive[0][6] <= 1'b1;
-        aliens_alive[0][7] <= 1'b1;
-        
-        aliens_alive[1][0] <= 1'b1;
-        aliens_alive[1][1] <= 1'b1;
-        aliens_alive[1][2] <= 1'b1;
-        aliens_alive[1][3] <= 1'b1;
-        aliens_alive[1][4] <= 1'b1;
-        aliens_alive[1][5] <= 1'b1;
-        aliens_alive[1][6] <= 1'b1;
-        aliens_alive[1][7] <= 1'b1;
-        
-        aliens_alive[2][0] <= 1'b1;
-        aliens_alive[2][1] <= 1'b1;
-        aliens_alive[2][2] <= 1'b1;
-        aliens_alive[2][3] <= 1'b1;
-        aliens_alive[2][4] <= 1'b1;
-        aliens_alive[2][5] <= 1'b1;
-        aliens_alive[2][6] <= 1'b1;
-        aliens_alive[2][7] <= 1'b1;
-        
-        aliens_alive[3][0] <= 1'b1;
-        aliens_alive[3][1] <= 1'b1;
-        aliens_alive[3][2] <= 1'b1;
-        aliens_alive[3][3] <= 1'b1;
-        aliens_alive[3][4] <= 1'b1;
-        aliens_alive[3][5] <= 1'b1;
-        aliens_alive[3][6] <= 1'b1;
-        aliens_alive[3][7] <= 1'b1;
-        
-        aliens_alive[4][0] <= 1'b1;
-        aliens_alive[4][1] <= 1'b1;
-        aliens_alive[4][2] <= 1'b1;
-        aliens_alive[4][3] <= 1'b1;
-        aliens_alive[4][4] <= 1'b1;
-        aliens_alive[4][5] <= 1'b1;
-        aliens_alive[4][6] <= 1'b1;
-        aliens_alive[4][7] <= 1'b1;
-
-        // Initialize Barriers Health to 5
-        barrier_health[0] <= 3'd5;
-        barrier_health[1] <= 3'd5;
-        barrier_health[2] <= 3'd5;
-        barrier_health[3] <= 3'd5;
-    end
-end
 
 
 
