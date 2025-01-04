@@ -29,6 +29,12 @@ project:
     - "small_alien_rom.v"
     - "barrier_rom.v" 
     - "draw_barrier.v"
+    - "heart_rom.v"
+    - "draw_heart.v"
+    - "trophy.v"
+    - "draw_trophy.v" 
+    - "segment_rom.v"
+    - "draw_score.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
