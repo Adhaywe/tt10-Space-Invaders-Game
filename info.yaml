@@ -31,7 +31,7 @@ project:
     - "draw_barrier.v"
     - "heart_rom.v"
     - "draw_heart.v"
-    - "trophy.v"
+    - "trophy_rom.v"
     - "draw_trophy.v" 
     - "segment_rom.v"
     - "draw_score.v"
