@@ -3,7 +3,7 @@
 // Top-level module
 //---------------------------------------------
 module tt_um_space_invaders_game  (
-    input  wire [7:0] ui_in,
+       input  wire [7:0] ui_in,
     output wire [7:0] uo_out,
     input  wire [7:0] uio_in,
     output wire [7:0] uio_out,
@@ -342,17 +342,12 @@ module tt_um_space_invaders_game  (
 
   //-----------------------------------------
 
-  localparam DIGIT_WIDTH = 10;
-  localparam DIGIT_HEIGHT = 14;
-  localparam DIGIT2_X = 30;   // Hundreds place
-  localparam DIGIT1_X = 60;   // Tens place
-  localparam DIGIT0_X = 90;   // Ones place
-  localparam DIGIT_Y = 20;    // Y position for all digits
-  localparam TROPHY_X = 130; // 12 pixels padding
-  localparam TROPHY_Y = DIGIT_Y - 3;                // Align Y position with scoreboard
 
-  localparam HEART_X =  390;  // Position of the heart to the left of the score
-  localparam HEART_Y = DIGIT_Y + 1;  
+  localparam TROPHY_X = 100; // 12 pixels padding
+  localparam TROPHY_Y = 80;                // Align Y position with scoreboard
+
+  localparam HEART_X =  398;  // Position of the heart to the left of the score
+  localparam HEART_Y = 86;  
 
   wire pixel_on_heart;
   draw_heart draw_heart_inst (
@@ -421,8 +416,8 @@ module tt_um_space_invaders_game  (
     //----------------------------------------------------
     // 9) Shooter Position
     //----------------------------------------------------
-    localparam SHOOTER_Y     = 430;  
-    localparam SHOOTER_MAX_X = 640 - 118;
+    localparam SHOOTER_Y     = 360;  
+
 
     reg [9:0] shooter_x;
     reg [9:0] prev_vpos_shooter;
@@ -445,8 +440,8 @@ module tt_um_space_invaders_game  (
             prev_vpos_shooter <= pix_y;
             if (pix_y == 0 && prev_vpos_shooter != 0) begin
                 case (movement_dir)
-                  DIR_LEFT:  if (shooter_x >= 2) shooter_x <= shooter_x - 4;
-                  DIR_RIGHT: if (shooter_x <= (SHOOTER_MAX_X-2)) shooter_x <= shooter_x + 4;
+                  DIR_LEFT:  if (shooter_x >= 20) shooter_x <= shooter_x - 10;
+                  DIR_RIGHT: if (shooter_x <= 500) shooter_x <= shooter_x + 10;
                   default:   /* idle */ ;
                 endcase
             end
@@ -469,12 +464,12 @@ module tt_um_space_invaders_game  (
     // 11) Barriers (32×16 now)
     //----------------------------------------------------
     wire b1_on, b2_on, b3_on, b4_on;
-    localparam BARRIER_Y = 380; 
+    localparam BARRIER_Y = 320; 
 
-    localparam [9:0] b1_xpos = 140;
-    localparam [9:0] b2_xpos = 210;
-    localparam [9:0] b3_xpos = 280;
-    localparam [9:0] b4_xpos = 350;
+    localparam [9:0] b1_xpos = 100;
+    localparam [9:0] b2_xpos = 200;
+    localparam [9:0] b3_xpos = 300;
+    localparam [9:0] b4_xpos = 400;
 
     draw_barrier barrier1(.pix_x(pix_x), .pix_y(pix_y),
                           .bar_left_x(b1_xpos), .bar_top_y(BARRIER_Y),
@@ -502,9 +497,9 @@ module tt_um_space_invaders_game  (
     //----------------------------------------------------
 
 
-    reg [3:0] pb_active;  // bullet_active flags for 4 bullets
-    reg [9:0] pb_x [0:3];
-    reg [9:0] pb_y [0:3];
+    reg pb_active;  
+    reg [9:0] pb_x;
+    reg [9:0] pb_y;
 
     // For detecting rising edge of ui_in[2].
     reg prev_button2;
@@ -541,11 +536,9 @@ module tt_um_space_invaders_game  (
     // We move them once per frame (like your old code).
     always @(posedge clk) begin
       if (~rst_n) begin
-        pb_active <= 4'b0000;
-        pb_x[0] <= 0;  pb_y[0] <= 0;
-        pb_x[1] <= 0;  pb_y[1] <= 0;
-        pb_x[2] <= 0;  pb_y[2] <= 0;
-        pb_x[3] <= 0;  pb_y[3] <= 0;
+        pb_active <= 0;
+        pb_x <= 0;  pb_y <= 0;
+        
         prev_button2 <= 0;
 	      lfsr <= 8'hA5;
         abullet_active <= 0;
@@ -608,11 +601,10 @@ module tt_um_space_invaders_game  (
 
       end 
        else if (game_won) begin
-      pb_active <= 4'b0000;
-        pb_x[0] <= 0;  pb_y[0] <= 0;
-        pb_x[1] <= 0;  pb_y[1] <= 0;
-        pb_x[2] <= 0;  pb_y[2] <= 0;
-        pb_x[3] <= 0;  pb_y[3] <= 0;
+        game_won <= 0;
+        pb_active <= 0;
+        pb_x <= 0;  pb_y <= 0;
+        
         prev_button2 <= 0;
 	      lfsr <= 8'hA5;
         abullet_active <= 0;
@@ -674,11 +666,9 @@ module tt_um_space_invaders_game  (
         barrier_health[3] <= 3'd5;
     end
     else if (game_over) begin
-      pb_active <= 4'b0000;
-        pb_x[0] <= 0;  pb_y[0] <= 0;
-        pb_x[1] <= 0;  pb_y[1] <= 0;
-        pb_x[2] <= 0;  pb_y[2] <= 0;
-        pb_x[3] <= 0;  pb_y[3] <= 0;
+        game_over <= 0;
+        pb_active <= 0;
+        pb_x <= 0;  pb_y <= 0;
         prev_button2 <= 0;
 	      lfsr <= 8'hA5;
         abullet_active <= 0;
@@ -743,23 +733,11 @@ module tt_um_space_invaders_game  (
         // Detect rising edge of button #2 each clock:
         if (!prev_button2 && ui_in[2]) begin
           // Attempt to spawn bullet in an empty slot:
-          if (!pb_active[0]) begin
-            pb_active[0] <= 1;
-            pb_x[0] <= shooter_x + 8;
-            pb_y[0] <= SHOOTER_Y - 6;
-          end else if (!pb_active[1]) begin
-            pb_active[1] <= 1;
-            pb_x[1] <= shooter_x + 8;
-            pb_y[1] <= SHOOTER_Y - 6;
-          end else if (!pb_active[2]) begin
-            pb_active[2] <= 1;
-            pb_x[2] <= shooter_x + 8;
-            pb_y[2] <= SHOOTER_Y - 6;
-          end else if (!pb_active[3]) begin
-            pb_active[3] <= 1;
-            pb_x[3] <= shooter_x + 8;
-            pb_y[3] <= SHOOTER_Y - 6;
-          end
+          if (!pb_active) begin
+            pb_active <= 1;
+            pb_x <= shooter_x + 6;
+            pb_y <= SHOOTER_Y - 25;
+          end 
           // else: no free slot => ignore
         end
         prev_button2 <= ui_in[2];
@@ -767,39 +745,18 @@ module tt_um_space_invaders_game  (
         // Once per frame: move active bullets up
         if (pix_y == 0 && prev_vpos != 0) begin
 		      lfsr <= {lfsr[6:0], lfsr_feedback};
-          // Bullet 0
-          if (pb_active[0]) begin
-              if (pb_y[0] > 100)
-                  pb_y[0] <= pb_y[0] - 15;
+          // Bullet 
+          if (pb_active) begin
+              if (pb_y > 130)
+                  pb_y <= pb_y - 25;
               else
-                  pb_active[0] <= 0; // vanish
+                  pb_active <= 0; // vanish
           end
-          // Bullet 1
-          if (pb_active[1]) begin
-              if (pb_y[1] > 100)
-                  pb_y[1] <= pb_y[1] - 10;
-              else
-                  pb_active[1] <= 0; // vanish
-          end
-          // Bullet 2
-          if (pb_active[2]) begin
-              if (pb_y[2] > 100)
-                  pb_y[2] <= pb_y[2] - 10;
-              else
-                  pb_active[2] <= 0; // vanish
-          end
-          // Bullet 3
-          if (pb_active[3]) begin
-              if (pb_y[3] > 100)
-                  pb_y[3] <= pb_y[3] - 10;
-              else
-                  pb_active[3] <= 0; // vanish
-          end
-
+          
           // Alien Bullet Movement
           if (abullet_active) begin
-              if (abullet_y < 430)
-                  abullet_y <= abullet_y + 18; 
+              if (abullet_y < 390)
+                  abullet_y <= abullet_y + 10; 
               else 
                  abullet_active <= 0;
 
@@ -883,462 +840,461 @@ module tt_um_space_invaders_game  (
     end
 
     if (pix_y == 0 && prev_vpos != 0) begin
-                if (pb_active[0]) begin
+                if (pb_active) begin
                     if (aliens_alive[0][0] &&
-                        pb_x[0] + BULLET_W > s1_x &&
-                        pb_x[0] < s1_x + SMALL_SIZE &&
-                        pb_y[0] + BULLET_H > SMALL_Y &&
-                        pb_y[0] < SMALL_Y + SMALL_SIZE) begin
+                        pb_x + BULLET_W > s1_x &&
+                        pb_x < s1_x + SMALL_SIZE &&
+                        pb_y + BULLET_H > SMALL_Y &&
+                        pb_y < SMALL_Y + SMALL_SIZE) begin
                             aliens_alive[0][0] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 30;
                     end
                     // Alien [0][1]
                     if (aliens_alive[0][1] &&
-                        pb_x[0] + BULLET_W > s2_x &&
-                        pb_x[0] < s2_x + SMALL_SIZE &&
-                        pb_y[0] + BULLET_H > SMALL_Y &&
-                        pb_y[0] < SMALL_Y + SMALL_SIZE) begin
+                        pb_x + BULLET_W > s2_x &&
+                        pb_x < s2_x + SMALL_SIZE &&
+                        pb_y + BULLET_H > SMALL_Y &&
+                        pb_y < SMALL_Y + SMALL_SIZE) begin
                             aliens_alive[0][1] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 30;
                     end
 
                     // Alien [0][2]
                     if (aliens_alive[0][2] &&
-                        pb_x[0] + BULLET_W > s3_x &&
-                        pb_x[0] < s3_x + SMALL_SIZE &&
-                        pb_y[0] + BULLET_H > SMALL_Y &&
-                        pb_y[0] < SMALL_Y + SMALL_SIZE) begin
+                        pb_x + BULLET_W > s3_x &&
+                        pb_x < s3_x + SMALL_SIZE &&
+                        pb_y + BULLET_H > SMALL_Y &&
+                        pb_y < SMALL_Y + SMALL_SIZE) begin
                             aliens_alive[0][2] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 30;
                     end
 
                     // Alien [0][3]
                     if (aliens_alive[0][3] &&
-                        pb_x[0] + BULLET_W > s4_x &&
-                        pb_x[0] < s4_x + SMALL_SIZE &&
-                        pb_y[0] + BULLET_H > SMALL_Y &&
-                        pb_y[0] < SMALL_Y + SMALL_SIZE) begin
+                        pb_x + BULLET_W > s4_x &&
+                        pb_x < s4_x + SMALL_SIZE &&
+                        pb_y + BULLET_H > SMALL_Y &&
+                        pb_y < SMALL_Y + SMALL_SIZE) begin
                             aliens_alive[0][3] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 30;
                     end
 
                     // Alien [0][4]
                     if (aliens_alive[0][4] &&
-                        pb_x[0] + BULLET_W > s5_x &&
-                        pb_x[0] < s5_x + SMALL_SIZE &&
-                        pb_y[0] + BULLET_H > SMALL_Y &&
-                        pb_y[0] < SMALL_Y + SMALL_SIZE) begin
+                        pb_x + BULLET_W > s5_x &&
+                        pb_x < s5_x + SMALL_SIZE &&
+                        pb_y + BULLET_H > SMALL_Y &&
+                        pb_y < SMALL_Y + SMALL_SIZE) begin
                             aliens_alive[0][4] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 30;
                     end
 
                     // Alien [0][5]
                     if (aliens_alive[0][5] &&
-                        pb_x[0] + BULLET_W > s6_x &&
-                        pb_x[0] < s6_x + SMALL_SIZE &&
-                        pb_y[0] + BULLET_H > SMALL_Y &&
-                        pb_y[0] < SMALL_Y + SMALL_SIZE) begin
+                        pb_x + BULLET_W > s6_x &&
+                        pb_x < s6_x + SMALL_SIZE &&
+                        pb_y + BULLET_H > SMALL_Y &&
+                        pb_y < SMALL_Y + SMALL_SIZE) begin
                             aliens_alive[0][5] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 30;
                     end
 
                     // Alien [0][6]
                     if (aliens_alive[0][6] &&
-                        pb_x[0] + BULLET_W > s7_x &&
-                        pb_x[0] < s7_x + SMALL_SIZE &&
-                        pb_y[0] + BULLET_H > SMALL_Y &&
-                        pb_y[0] < SMALL_Y + SMALL_SIZE) begin
+                        pb_x + BULLET_W > s7_x &&
+                        pb_x < s7_x + SMALL_SIZE &&
+                        pb_y + BULLET_H > SMALL_Y &&
+                        pb_y < SMALL_Y + SMALL_SIZE) begin
                             aliens_alive[0][6] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 30;
                     end
 
                     // Alien [0][7]
                     if (aliens_alive[0][7] &&
-                        pb_x[0] + BULLET_W > s8_x &&
-                        pb_x[0] < s8_x + SMALL_SIZE &&
-                        pb_y[0] + BULLET_H > SMALL_Y &&
-                        pb_y[0] < SMALL_Y + SMALL_SIZE) begin
+                        pb_x + BULLET_W > s8_x &&
+                        pb_x < s8_x + SMALL_SIZE &&
+                        pb_y + BULLET_H > SMALL_Y &&
+                        pb_y < SMALL_Y + SMALL_SIZE) begin
                             aliens_alive[0][7] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 30;
                     end
 
                     // Similarly, check for Aliens in other rows (Medium and Large)
                     // Medium Row 1: Aliens [1][0] to [1][7] (mA1 to mA8)
                     if (aliens_alive[1][0] &&
-                        pb_x[0] + BULLET_W > mA1_x &&
-                        pb_x[0] < mA1_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[0] < MEDIUM_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mA1_x &&
+                        pb_x < mA1_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y1 &&
+                        pb_y < MEDIUM_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[1][0] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[1][1] &&
-                        pb_x[0] + BULLET_W > mA2_x &&
-                        pb_x[0] < mA2_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[0] < MEDIUM_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mA2_x &&
+                        pb_x < mA2_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y1 &&
+                        pb_y < MEDIUM_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[1][1] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[1][2] &&
-                        pb_x[0] + BULLET_W > mA3_x &&
-                        pb_x[0] < mA3_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[0] < MEDIUM_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mA3_x &&
+                        pb_x < mA3_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y1 &&
+                        pb_y < MEDIUM_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[1][2] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[1][3] &&
-                        pb_x[0] + BULLET_W > mA4_x &&
-                        pb_x[0] < mA4_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[0] < MEDIUM_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mA4_x &&
+                        pb_x < mA4_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y1 &&
+                        pb_y < MEDIUM_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[1][3] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[1][4] &&
-                        pb_x[0] + BULLET_W > mA5_x &&
-                        pb_x[0] < mA5_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[0] < MEDIUM_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mA5_x &&
+                        pb_x < mA5_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y1 &&
+                        pb_y < MEDIUM_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[1][4] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[1][5] &&
-                        pb_x[0] + BULLET_W > mA6_x &&
-                        pb_x[0] < mA6_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[0] < MEDIUM_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mA6_x &&
+                        pb_x < mA6_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y1 &&
+                        pb_y < MEDIUM_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[1][5] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[1][6] &&
-                        pb_x[0] + BULLET_W > mA7_x &&
-                        pb_x[0] < mA7_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[0] < MEDIUM_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mA7_x &&
+                        pb_x < mA7_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y1 &&
+                        pb_y < MEDIUM_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[1][6] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[1][7] &&
-                        pb_x[0] + BULLET_W > mA8_x &&
-                        pb_x[0] < mA8_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[0] < MEDIUM_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mA8_x &&
+                        pb_x < mA8_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y1 &&
+                        pb_y < MEDIUM_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[1][7] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     ////
                     if (aliens_alive[2][0] &&
-                        pb_x[0] + BULLET_W > mB1_x &&
-                        pb_x[0] < mB1_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[0] < MEDIUM_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mB1_x &&
+                        pb_x < mB1_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y2 &&
+                        pb_y < MEDIUM_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[2][0] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[2][1] &&
-                        pb_x[0] + BULLET_W > mB2_x &&
-                        pb_x[0] < mB2_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[0] < MEDIUM_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mB2_x &&
+                        pb_x < mB2_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y2 &&
+                        pb_y < MEDIUM_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[2][1] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[2][2] &&
-                        pb_x[0] + BULLET_W > mB3_x &&
-                        pb_x[0] < mB3_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[0] < MEDIUM_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mB3_x &&
+                        pb_x < mB3_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y2 &&
+                        pb_y < MEDIUM_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[2][2] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[2][3] &&
-                        pb_x[0] + BULLET_W > mB4_x &&
-                        pb_x[0] < mB4_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[0] < MEDIUM_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mB4_x &&
+                        pb_x < mB4_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y2 &&
+                        pb_y < MEDIUM_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[2][3] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[2][4] &&
-                        pb_x[0] + BULLET_W > mB5_x &&
-                        pb_x[0] < mB5_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[0] < MEDIUM_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mB5_x &&
+                        pb_x < mB5_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y2 &&
+                        pb_y < MEDIUM_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[2][4] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[2][5] &&
-                        pb_x[0] + BULLET_W > mB6_x &&
-                        pb_x[0] < mB6_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[0] < MEDIUM_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mB6_x &&
+                        pb_x < mB6_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y2 &&
+                        pb_y < MEDIUM_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[2][5] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[2][6] &&
-                        pb_x[0] + BULLET_W > mB7_x &&
-                        pb_x[0] < mB7_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[0] < MEDIUM_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mB7_x &&
+                        pb_x < mB7_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y2 &&
+                        pb_y < MEDIUM_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[2][6] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     if (aliens_alive[2][7] &&
-                        pb_x[0] + BULLET_W > mB8_x &&
-                        pb_x[0] < mB8_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[0] < MEDIUM_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > mB8_x &&
+                        pb_x < mB8_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > MEDIUM_Y2 &&
+                        pb_y < MEDIUM_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[2][7] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 20;
                     end
 
                     ////
                     if (aliens_alive[3][0] &&
-                        pb_x[0] + BULLET_W > lA1_x &&
-                        pb_x[0] < lA1_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lA1_x &&
+                        pb_x < lA1_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y1 &&
+                        pb_y < LARGE_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[3][0] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[3][1] &&
-                        pb_x[0] + BULLET_W > lA2_x &&
-                        pb_x[0] < lA2_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lA2_x &&
+                        pb_x < lA2_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y1 &&
+                        pb_y < LARGE_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[3][1] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[3][2] &&
-                        pb_x[0] + BULLET_W > lA3_x &&
-                        pb_x[0] < lA3_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lA3_x &&
+                        pb_x < lA3_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y1 &&
+                        pb_y < LARGE_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[3][2] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[3][3] &&
-                        pb_x[0] + BULLET_W > lA4_x &&
-                        pb_x[0] < lA4_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lA4_x &&
+                        pb_x < lA4_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y1 &&
+                        pb_y < LARGE_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[3][3] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[3][4] &&
-                        pb_x[0] + BULLET_W > lA5_x &&
-                        pb_x[0] < lA5_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lA5_x &&
+                        pb_x < lA5_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y1 &&
+                        pb_y < LARGE_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[3][4] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[3][5] &&
-                        pb_x[0] + BULLET_W > lA6_x &&
-                        pb_x[0] < lA6_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lA6_x &&
+                        pb_x < lA6_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y1 &&
+                        pb_y < LARGE_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[3][5] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[3][6] &&
-                        pb_x[0] + BULLET_W > lA7_x &&
-                        pb_x[0] < lA7_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lA7_x &&
+                        pb_x < lA7_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y1 &&
+                        pb_y < LARGE_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[3][6] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[3][7] &&
-                        pb_x[0] + BULLET_W > lA8_x &&
-                        pb_x[0] < lA8_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lA8_x &&
+                        pb_x < lA8_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y1 &&
+                        pb_y < LARGE_Y1 + MEDIUM_SIZE) begin
                             aliens_alive[3][7] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
                   
 
                      ////
                     if (aliens_alive[4][0] &&
-                        pb_x[0] + BULLET_W > lA1_x &&
-                        pb_x[0] < lA1_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y1 &&
-                        pb_y[0] < LARGE_Y1 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lB1_x &&
+                        pb_x < lB1_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y2 &&
+                        pb_y < LARGE_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[4][0] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[4][1] &&
-                        pb_x[0] + BULLET_W > lB2_x &&
-                        pb_x[0] < lB2_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y2 &&
-                        pb_y[0] < LARGE_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lB2_x &&
+                        pb_x < lB2_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y2 &&
+                        pb_y < LARGE_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[4][1] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[4][2] &&
-                        pb_x[0] + BULLET_W > lB3_x &&
-                        pb_x[0] < lB3_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y2 &&
-                        pb_y[0] < LARGE_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lB3_x &&
+                        pb_x < lB3_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y2 &&
+                        pb_y < LARGE_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[4][2] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[4][3] &&
-                        pb_x[0] + BULLET_W > lB4_x &&
-                        pb_x[0] < lB4_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y2 &&
-                        pb_y[0] < LARGE_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lB4_x &&
+                        pb_x < lB4_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y2 &&
+                        pb_y < LARGE_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[4][3] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[4][4] &&
-                        pb_x[0] + BULLET_W > lB5_x &&
-                        pb_x[0] < lB5_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y2 &&
-                        pb_y[0] < LARGE_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lB5_x &&
+                        pb_x < lB5_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y2 &&
+                        pb_y < LARGE_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[4][4] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[4][5] &&
-                        pb_x[0] + BULLET_W > lB6_x &&
-                        pb_x[0] < lB6_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y2 &&
-                        pb_y[0] < LARGE_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lB6_x &&
+                        pb_x < lB6_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y2 &&
+                        pb_y < LARGE_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[4][5] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[4][6] &&
-                        pb_x[0] + BULLET_W > lB7_x &&
-                        pb_x[0] < lB7_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y2 &&
-                        pb_y[0] < LARGE_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lB7_x &&
+                        pb_x < lB7_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y2 &&
+                        pb_y < LARGE_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[4][6] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     if (aliens_alive[4][7] &&
-                        pb_x[0] + BULLET_W > lB8_x &&
-                        pb_x[0] < lB8_x + MEDIUM_SIZE &&
-                        pb_y[0] + BULLET_H > LARGE_Y2 &&
-                        pb_y[0] < LARGE_Y2 + MEDIUM_SIZE) begin
+                        pb_x + BULLET_W > lB8_x &&
+                        pb_x < lB8_x + MEDIUM_SIZE &&
+                        pb_y + BULLET_H > LARGE_Y2 &&
+                        pb_y < LARGE_Y2 + MEDIUM_SIZE) begin
                             aliens_alive[4][7] <= 0;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                             score <= score + 10;
                     end
 
                     
 
                     // Repeat similar blocks for aliens_alive[1][1] to aliens_alive[4][7]
-
                     // Player Bullet 0 vs. Barriers
                     // Barrier 0
                     if (barrier_health[0] > 0 &&
-                        pb_x[0] + BULLET_W > b1_xpos &&
-                        pb_x[0] < b1_xpos + BARRIER_WIDTH &&
-                        pb_y[0] + BULLET_H > BARRIER_Y &&
-                        pb_y[0] < BARRIER_Y + BARRIER_HEIGHT) begin
+                        pb_x + BULLET_W > b1_xpos &&
+                        pb_x < b1_xpos + BARRIER_WIDTH &&
+                        pb_y + BULLET_H > BARRIER_Y &&
+                        pb_y < BARRIER_Y + BARRIER_HEIGHT) begin
                             barrier_health[0] <= barrier_health[0] - 1;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                     end
 
                     // Barrier 1
                     if (barrier_health[1] > 0 &&
-                        pb_x[0] + BULLET_W > b2_xpos &&
-                        pb_x[0] < b2_xpos + BARRIER_WIDTH &&
-                        pb_y[0] + BULLET_H > BARRIER_Y &&
-                        pb_y[0] < BARRIER_Y + BARRIER_HEIGHT) begin
+                        pb_x + BULLET_W > b2_xpos &&
+                        pb_x < b2_xpos + BARRIER_WIDTH &&
+                        pb_y + BULLET_H > BARRIER_Y &&
+                        pb_y < BARRIER_Y + BARRIER_HEIGHT) begin
                             barrier_health[1] <= barrier_health[1] - 1;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                     end
 
                     // Barrier 2
                     if (barrier_health[2] > 0 &&
-                        pb_x[0] + BULLET_W > b3_xpos &&
-                        pb_x[0] < b3_xpos + BARRIER_WIDTH &&
-                        pb_y[0] + BULLET_H > BARRIER_Y &&
-                        pb_y[0] < BARRIER_Y + BARRIER_HEIGHT) begin
+                        pb_x + BULLET_W > b3_xpos &&
+                        pb_x < b3_xpos + BARRIER_WIDTH &&
+                        pb_y + BULLET_H > BARRIER_Y &&
+                        pb_y < BARRIER_Y + BARRIER_HEIGHT) begin
                             barrier_health[2] <= barrier_health[2] - 1;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                         end
 
                     // Barrier 3
                     if (barrier_health[3] > 0 &&
-                        pb_x[0] + BULLET_W > b4_xpos &&
-                        pb_x[0] < b4_xpos + BARRIER_WIDTH &&
-                        pb_y[0] + BULLET_H > BARRIER_Y &&
-                        pb_y[0] < BARRIER_Y + BARRIER_HEIGHT) begin
+                        pb_x + BULLET_W > b4_xpos &&
+                        pb_x < b4_xpos + BARRIER_WIDTH &&
+                        pb_y + BULLET_H > BARRIER_Y &&
+                        pb_y < BARRIER_Y + BARRIER_HEIGHT) begin
                             barrier_health[3] <= barrier_health[3] - 1;
-                            pb_active[0] <= 0;
+                            pb_active <= 0;
                     end
                 end
             
@@ -1347,1401 +1303,7 @@ module tt_um_space_invaders_game  (
 
   
             
-                if (pb_active[1]) begin
-                    // Check collision with Aliens
-                    // Row 0: Small Aliens [0][0] to [0][7]
-                    // Aliens positions: s1_x to s8_x at SMALL_Y
-                    // Aliens Alive: aliens_alive[0][0] to aliens_alive[0][7]
-
-                    // Alien [0][0]
-                    if (aliens_alive[0][0] &&
-                        pb_x[1] + BULLET_W > s1_x &&
-                        pb_x[1] < s1_x + SMALL_SIZE &&
-                        pb_y[1] + BULLET_H > SMALL_Y &&
-                        pb_y[1] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][0] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][1]
-                    if (aliens_alive[0][1] &&
-                        pb_x[1] + BULLET_W > s2_x &&
-                        pb_x[1] < s2_x + SMALL_SIZE &&
-                        pb_y[1] + BULLET_H > SMALL_Y &&
-                        pb_y[1] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][1] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][2]
-                    if (aliens_alive[0][2] &&
-                        pb_x[1] + BULLET_W > s3_x &&
-                        pb_x[1] < s3_x + SMALL_SIZE &&
-                        pb_y[1] + BULLET_H > SMALL_Y &&
-                        pb_y[1] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][2] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][3]
-                    if (aliens_alive[0][3] &&
-                        pb_x[1] + BULLET_W > s4_x &&
-                        pb_x[1] < s4_x + SMALL_SIZE &&
-                        pb_y[1] + BULLET_H > SMALL_Y &&
-                        pb_y[1] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][3] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][4]
-                    if (aliens_alive[0][4] &&
-                        pb_x[1] + BULLET_W > s5_x &&
-                        pb_x[1] < s5_x + SMALL_SIZE &&
-                        pb_y[1] + BULLET_H > SMALL_Y &&
-                        pb_y[1] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][4] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][5]
-                    if (aliens_alive[0][5] &&
-                        pb_x[1] + BULLET_W > s6_x &&
-                        pb_x[1] < s6_x + SMALL_SIZE &&
-                        pb_y[1] + BULLET_H > SMALL_Y &&
-                        pb_y[1] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][5] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][6]
-                    if (aliens_alive[0][6] &&
-                        pb_x[1] + BULLET_W > s7_x &&
-                        pb_x[1] < s7_x + SMALL_SIZE &&
-                        pb_y[1] + BULLET_H > SMALL_Y &&
-                        pb_y[1] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][6] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][7]
-                    if (aliens_alive[0][7] &&
-                        pb_x[1] + BULLET_W > s8_x &&
-                        pb_x[1] < s8_x + SMALL_SIZE &&
-                        pb_y[1] + BULLET_H > SMALL_Y &&
-                        pb_y[1] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][7] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Similarly, check for Aliens in other rows (Medium and Large)
-                    // Medium Row 1: Aliens [1][0] to [1][7] (mA1 to mA8)
-                    if (aliens_alive[1][0] &&
-                        pb_x[1] + BULLET_W > mA1_x &&
-                        pb_x[1] < mA1_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[1] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][0] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][1] &&
-                        pb_x[1] + BULLET_W > mA2_x &&
-                        pb_x[1] < mA2_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[1] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][1] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][2] &&
-                        pb_x[1] + BULLET_W > mA3_x &&
-                        pb_x[1] < mA3_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[1] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][2] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][3] &&
-                        pb_x[1] + BULLET_W > mA4_x &&
-                        pb_x[1] < mA4_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[1] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][3] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][4] &&
-                        pb_x[1] + BULLET_W > mA5_x &&
-                        pb_x[1] < mA5_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[1] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][4] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][5] &&
-                        pb_x[1] + BULLET_W > mA6_x &&
-                        pb_x[1] < mA6_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[1] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][5] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][6] &&
-                        pb_x[1] + BULLET_W > mA7_x &&
-                        pb_x[1] < mA7_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[1] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][6] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][7] &&
-                        pb_x[1] + BULLET_W > mA8_x &&
-                        pb_x[1] < mA8_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[1] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][7] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    ////
-                    if (aliens_alive[2][0] &&
-                        pb_x[1] + BULLET_W > mB1_x &&
-                        pb_x[1] < mB1_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[1] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][0] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][1] &&
-                        pb_x[1] + BULLET_W > mB2_x &&
-                        pb_x[1] < mB2_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[1] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][1] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][2] &&
-                        pb_x[1] + BULLET_W > mB3_x &&
-                        pb_x[1] < mB3_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[1] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][2] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][3] &&
-                        pb_x[1] + BULLET_W > mB4_x &&
-                        pb_x[1] < mB4_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[1] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][3] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][4] &&
-                        pb_x[1] + BULLET_W > mB5_x &&
-                        pb_x[1] < mB5_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[1] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][4] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][5] &&
-                        pb_x[1] + BULLET_W > mB6_x &&
-                        pb_x[1] < mB6_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[1] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][5] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][6] &&
-                        pb_x[1] + BULLET_W > mB7_x &&
-                        pb_x[1] < mB7_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[1] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][6] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][7] &&
-                        pb_x[1] + BULLET_W > mB8_x &&
-                        pb_x[1] < mB8_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[1] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][7] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 20;
-                    end
-
-                    
-                      
-
-                    ////
-                    if (aliens_alive[3][0] &&
-                        pb_x[1] + BULLET_W > lA1_x &&
-                        pb_x[1] < lA1_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][0] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][1] &&
-                        pb_x[1] + BULLET_W > lA2_x &&
-                        pb_x[1] < lA2_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][1] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][2] &&
-                        pb_x[1] + BULLET_W > lA3_x &&
-                        pb_x[1] < lA3_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][2] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][3] &&
-                        pb_x[1] + BULLET_W > lA4_x &&
-                        pb_x[1] < lA4_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][3] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][4] &&
-                        pb_x[1] + BULLET_W > lA5_x &&
-                        pb_x[1] < lA5_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][4] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][5] &&
-                        pb_x[1] + BULLET_W > lA6_x &&
-                        pb_x[1] < lA6_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][5] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][6] &&
-                        pb_x[1] + BULLET_W > lA7_x &&
-                        pb_x[1] < lA7_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][6] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][7] &&
-                        pb_x[1] + BULLET_W > lA8_x &&
-                        pb_x[1] < lA8_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][7] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                     ////
-                    if (aliens_alive[4][0] &&
-                        pb_x[1] + BULLET_W > lA1_x &&
-                        pb_x[1] < lA1_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y1 &&
-                        pb_y[1] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[4][0] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][1] &&
-                        pb_x[1] + BULLET_W > lB2_x &&
-                        pb_x[1] < lB2_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y2 &&
-                        pb_y[1] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][1] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][2] &&
-                        pb_x[1] + BULLET_W > lB3_x &&
-                        pb_x[1] < lB3_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y2 &&
-                        pb_y[1] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][2] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][3] &&
-                        pb_x[1] + BULLET_W > lB4_x &&
-                        pb_x[1] < lB4_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y2 &&
-                        pb_y[1] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][3] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][4] &&
-                        pb_x[1] + BULLET_W > lB5_x &&
-                        pb_x[1] < lB5_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y2 &&
-                        pb_y[1] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][4] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][5] &&
-                        pb_x[1] + BULLET_W > lB6_x &&
-                        pb_x[1] < lB6_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y2 &&
-                        pb_y[1] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][5] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][6] &&
-                        pb_x[1] + BULLET_W > lB7_x &&
-                        pb_x[1] < lB7_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y2 &&
-                        pb_y[1] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][6] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][7] &&
-                        pb_x[1] + BULLET_W > lB8_x &&
-                        pb_x[1] < lB8_x + MEDIUM_SIZE &&
-                        pb_y[1] + BULLET_H > LARGE_Y2 &&
-                        pb_y[1] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][7] <= 0;
-                            pb_active[1] <= 0;
-                            score <= score + 10;
-                    end
-                    // Continue similarly for all aliens [0][2] to [4][7]
-
-                    // Player Bullet 1 vs. Barriers
-                    // Barrier 0
-                    if (barrier_health[0] > 0 &&
-                        pb_x[1] + BULLET_W > b1_xpos &&
-                        pb_x[1] < b1_xpos + BARRIER_WIDTH &&
-                        pb_y[1] + BULLET_H > BARRIER_Y &&
-                        pb_y[1] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[0] <= barrier_health[0] - 1;
-                            pb_active[1] <= 0;
-                    end
-
-                    // Barrier 1
-                    if (barrier_health[1] > 0 &&
-                        pb_x[1] + BULLET_W > b2_xpos &&
-                        pb_x[1] < b2_xpos + BARRIER_WIDTH &&
-                        pb_y[1] + BULLET_H > BARRIER_Y &&
-                        pb_y[1] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[1] <= barrier_health[1] - 1;
-                            pb_active[1] <= 0;
-                    end
-
-                    // Barrier 2
-                    if (barrier_health[2] > 0 &&
-                        pb_x[1] + BULLET_W > b3_xpos &&
-                        pb_x[1] < b3_xpos + BARRIER_WIDTH &&
-                        pb_y[1] + BULLET_H > BARRIER_Y &&
-                        pb_y[1] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[2] <= barrier_health[2] - 1;
-                            pb_active[1] <= 0;
-                    end
-
-                    // Barrier 3
-                    if (barrier_health[3] > 0 &&
-                        pb_x[1] + BULLET_W > b4_xpos &&
-                        pb_x[1] < b4_xpos + BARRIER_WIDTH &&
-                        pb_y[1] + BULLET_H > BARRIER_Y &&
-                        pb_y[1] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[3] <= barrier_health[3] - 1;
-                            pb_active[1] <= 0;
-                    end
-                end
-          
-    
-            
-                if (pb_active[2]) begin
-                    // Check collision with Aliens
-                    // Row 0: Small Aliens [0][0] to [0][7]
-                    // Aliens positions: s1_x to s8_x at SMALL_Y
-                    // Aliens Alive: aliens_alive[0][0] to aliens_alive[0][7]
-
-                    // Alien [0][0]
-                    if (aliens_alive[0][0] &&
-                        pb_x[2] + BULLET_W > s1_x &&
-                        pb_x[2] < s1_x + SMALL_SIZE &&
-                        pb_y[2] + BULLET_H > SMALL_Y &&
-                        pb_y[2] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][0] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][1]
-                    if (aliens_alive[0][1] &&
-                        pb_x[2] + BULLET_W > s2_x &&
-                        pb_x[2] < s2_x + SMALL_SIZE &&
-                        pb_y[2] + BULLET_H > SMALL_Y &&
-                        pb_y[2] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][1] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][2]
-                    if (aliens_alive[0][2] &&
-                        pb_x[2] + BULLET_W > s3_x &&
-                        pb_x[2] < s3_x + SMALL_SIZE &&
-                        pb_y[2] + BULLET_H > SMALL_Y &&
-                        pb_y[2] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][2] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][3]
-                    if (aliens_alive[0][3] &&
-                        pb_x[2] + BULLET_W > s4_x &&
-                        pb_x[2] < s4_x + SMALL_SIZE &&
-                        pb_y[2] + BULLET_H > SMALL_Y &&
-                        pb_y[2] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][3] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][4]
-                    if (aliens_alive[0][4] &&
-                        pb_x[2] + BULLET_W > s5_x &&
-                        pb_x[2] < s5_x + SMALL_SIZE &&
-                        pb_y[2] + BULLET_H > SMALL_Y &&
-                        pb_y[2] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][4] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][5]
-                    if (aliens_alive[0][5] &&
-                        pb_x[2] + BULLET_W > s6_x &&
-                        pb_x[2] < s6_x + SMALL_SIZE &&
-                        pb_y[2] + BULLET_H > SMALL_Y &&
-                        pb_y[2] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][5] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][6]
-                    if (aliens_alive[0][6] &&
-                        pb_x[2] + BULLET_W > s7_x &&
-                        pb_x[2] < s7_x + SMALL_SIZE &&
-                        pb_y[2] + BULLET_H > SMALL_Y &&
-                        pb_y[2] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][6] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][7]
-                    if (aliens_alive[0][7] &&
-                        pb_x[2] + BULLET_W > s8_x &&
-                        pb_x[2] < s8_x + SMALL_SIZE &&
-                        pb_y[2] + BULLET_H > SMALL_Y &&
-                        pb_y[2] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][7] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Similarly, check for Aliens in other rows (Medium and Large)
-                    // Medium Row 1: Aliens [1][0] to [1][7] (mA1 to mA8)
-                    if (aliens_alive[1][0] &&
-                        pb_x[2] + BULLET_W > mA1_x &&
-                        pb_x[2] < mA1_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[2] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][0] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][1] &&
-                        pb_x[2] + BULLET_W > mA2_x &&
-                        pb_x[2] < mA2_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[2] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][1] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][2] &&
-                        pb_x[2] + BULLET_W > mA3_x &&
-                        pb_x[2] < mA3_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[2] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][2] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][3] &&
-                        pb_x[2] + BULLET_W > mA4_x &&
-                        pb_x[2] < mA4_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[2] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][3] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][4] &&
-                        pb_x[2] + BULLET_W > mA5_x &&
-                        pb_x[2] < mA5_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[2] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][4] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][5] &&
-                        pb_x[2] + BULLET_W > mA6_x &&
-                        pb_x[2] < mA6_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[2] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][5] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][6] &&
-                        pb_x[2] + BULLET_W > mA7_x &&
-                        pb_x[2] < mA7_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[2] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][6] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][7] &&
-                        pb_x[2] + BULLET_W > mA8_x &&
-                        pb_x[2] < mA8_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[2] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][7] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    ////
-                    if (aliens_alive[2][0] &&
-                        pb_x[2] + BULLET_W > mB1_x &&
-                        pb_x[2] < mB1_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[2] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][0] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][1] &&
-                        pb_x[2] + BULLET_W > mB2_x &&
-                        pb_x[2] < mB2_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[2] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][1] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][2] &&
-                        pb_x[2] + BULLET_W > mB3_x &&
-                        pb_x[2] < mB3_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[2] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][2] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][3] &&
-                        pb_x[2] + BULLET_W > mB4_x &&
-                        pb_x[2] < mB4_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[2] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][3] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][4] &&
-                        pb_x[2] + BULLET_W > mB5_x &&
-                        pb_x[2] < mB5_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[2] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][4] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][5] &&
-                        pb_x[2] + BULLET_W > mB6_x &&
-                        pb_x[2] < mB6_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[2] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][5] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][6] &&
-                        pb_x[2] + BULLET_W > mB7_x &&
-                        pb_x[2] < mB7_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[2] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][6] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][7] &&
-                        pb_x[2] + BULLET_W > mB8_x &&
-                        pb_x[2] < mB8_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[2] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][7] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 20;
-                    end
-
-                  
-                      
-
-                    ////
-                    if (aliens_alive[3][0] &&
-                        pb_x[2] + BULLET_W > lA1_x &&
-                        pb_x[2] < lA1_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][0] <= 0;
-                            pb_active[2] <= 0;
-                             score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][1] &&
-                        pb_x[2] + BULLET_W > lA2_x &&
-                        pb_x[2] < lA2_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][1] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][2] &&
-                        pb_x[2] + BULLET_W > lA3_x &&
-                        pb_x[2] < lA3_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][2] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][3] &&
-                        pb_x[2] + BULLET_W > lA4_x &&
-                        pb_x[2] < lA4_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][3] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][4] &&
-                        pb_x[2] + BULLET_W > lA5_x &&
-                        pb_x[2] < lA5_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][4] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][5] &&
-                        pb_x[2] + BULLET_W > lA6_x &&
-                        pb_x[2] < lA6_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][5] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][6] &&
-                        pb_x[2] + BULLET_W > lA7_x &&
-                        pb_x[2] < lA7_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][6] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][7] &&
-                        pb_x[2] + BULLET_W > lA8_x &&
-                        pb_x[2] < lA8_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][7] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                     ////
-                    if (aliens_alive[4][0] &&
-                        pb_x[2] + BULLET_W > lA1_x &&
-                        pb_x[2] < lA1_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y1 &&
-                        pb_y[2] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[4][0] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][1] &&
-                        pb_x[2] + BULLET_W > lB2_x &&
-                        pb_x[2] < lB2_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y2 &&
-                        pb_y[2] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][1] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][2] &&
-                        pb_x[2] + BULLET_W > lB3_x &&
-                        pb_x[2] < lB3_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y2 &&
-                        pb_y[2] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][2] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][3] &&
-                        pb_x[2] + BULLET_W > lB4_x &&
-                        pb_x[2] < lB4_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y2 &&
-                        pb_y[2] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][3] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][4] &&
-                        pb_x[2] + BULLET_W > lB5_x &&
-                        pb_x[2] < lB5_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y2 &&
-                        pb_y[2] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][4] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][5] &&
-                        pb_x[2] + BULLET_W > lB6_x &&
-                        pb_x[2] < lB6_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y2 &&
-                        pb_y[2] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][5] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][6] &&
-                        pb_x[2] + BULLET_W > lB7_x &&
-                        pb_x[2] < lB7_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y2 &&
-                        pb_y[2] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][6] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][7] &&
-                        pb_x[2] + BULLET_W > lB8_x &&
-                        pb_x[2] < lB8_x + MEDIUM_SIZE &&
-                        pb_y[2] + BULLET_H > LARGE_Y2 &&
-                        pb_y[2] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][7] <= 0;
-                            pb_active[2] <= 0;
-                            score <= score + 10;
-                    end
-                    // Continue similarly for all aliens [0][2] to [4][7]
-
-                    // Player Bullet 1 vs. Barriers
-                    // Barrier 0
-                    if (barrier_health[0] > 0 &&
-                        pb_x[2] + BULLET_W > b1_xpos &&
-                        pb_x[2] < b1_xpos + BARRIER_WIDTH &&
-                        pb_y[2] + BULLET_H > BARRIER_Y &&
-                        pb_y[2] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[0] <= barrier_health[0] - 1;
-                            pb_active[2] <= 0;
-                    end
-
-                    // Barrier 1
-                    if (barrier_health[1] > 0 &&
-                        pb_x[2] + BULLET_W > b2_xpos &&
-                        pb_x[2] < b2_xpos + BARRIER_WIDTH &&
-                        pb_y[2] + BULLET_H > BARRIER_Y &&
-                        pb_y[2] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[1] <= barrier_health[1] - 1;
-                            pb_active[2] <= 0;
-                    end
-
-                    // Barrier 2
-                    if (barrier_health[2] > 0 &&
-                        pb_x[2] + BULLET_W > b3_xpos &&
-                        pb_x[2] < b3_xpos + BARRIER_WIDTH &&
-                        pb_y[2] + BULLET_H > BARRIER_Y &&
-                        pb_y[2] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[2] <= barrier_health[2] - 1;
-                            pb_active[2] <= 0;
-                    end
-
-                    // Barrier 3
-                    if (barrier_health[3] > 0 &&
-                        pb_x[2] + BULLET_W > b4_xpos &&
-                        pb_x[2] < b4_xpos + BARRIER_WIDTH &&
-                        pb_y[2] + BULLET_H > BARRIER_Y &&
-                        pb_y[2] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[3] <= barrier_health[3] - 1;
-                            pb_active[2] <= 0;
-                    end
-                end
-            
-   
-           
-                if (pb_active[3]) begin
-                    // Check collision with Aliens
-                    // Row 0: Small Aliens [0][0] to [0][7]
-                    // Aliens positions: s1_x to s8_x at SMALL_Y
-                    // Aliens Alive: aliens_alive[0][0] to aliens_alive[0][7]
-
-                    // Alien [0][0]
-                    if (aliens_alive[0][0] &&
-                        pb_x[3] + BULLET_W > s1_x &&
-                        pb_x[3] < s1_x + SMALL_SIZE &&
-                        pb_y[3] + BULLET_H > SMALL_Y &&
-                        pb_y[3] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][0] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][1]
-                    if (aliens_alive[0][1] &&
-                        pb_x[3] + BULLET_W > s2_x &&
-                        pb_x[3] < s2_x + SMALL_SIZE &&
-                        pb_y[3] + BULLET_H > SMALL_Y &&
-                        pb_y[3] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][1] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][2]
-                    if (aliens_alive[0][2] &&
-                        pb_x[3] + BULLET_W > s3_x &&
-                        pb_x[3] < s3_x + SMALL_SIZE &&
-                        pb_y[3] + BULLET_H > SMALL_Y &&
-                        pb_y[3] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][2] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][3]
-                    if (aliens_alive[0][3] &&
-                        pb_x[3] + BULLET_W > s4_x &&
-                        pb_x[3] < s4_x + SMALL_SIZE &&
-                        pb_y[3] + BULLET_H > SMALL_Y &&
-                        pb_y[3] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][3] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][4]
-                    if (aliens_alive[0][4] &&
-                        pb_x[3] + BULLET_W > s5_x &&
-                        pb_x[3] < s5_x + SMALL_SIZE &&
-                        pb_y[3] + BULLET_H > SMALL_Y &&
-                        pb_y[3] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][4] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][5]
-                    if (aliens_alive[0][5] &&
-                        pb_x[3] + BULLET_W > s6_x &&
-                        pb_x[3] < s6_x + SMALL_SIZE &&
-                        pb_y[3] + BULLET_H > SMALL_Y &&
-                        pb_y[3] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][5] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][6]
-                    if (aliens_alive[0][6] &&
-                        pb_x[3] + BULLET_W > s7_x &&
-                        pb_x[3] < s7_x + SMALL_SIZE &&
-                        pb_y[3] + BULLET_H > SMALL_Y &&
-                        pb_y[3] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][6] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Alien [0][7]
-                    if (aliens_alive[0][7] &&
-                        pb_x[3] + BULLET_W > s8_x &&
-                        pb_x[3] < s8_x + SMALL_SIZE &&
-                        pb_y[3] + BULLET_H > SMALL_Y &&
-                        pb_y[3] < SMALL_Y + SMALL_SIZE) begin
-                            aliens_alive[0][7] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 30;
-                    end
-
-                    // Similarly, check for Aliens in other rows (Medium and Large)
-                    // Medium Row 1: Aliens [1][0] to [1][7] (mA1 to mA8)
-                    if (aliens_alive[1][0] &&
-                        pb_x[3] + BULLET_W > mA1_x &&
-                        pb_x[3] < mA1_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[3] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][0] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][1] &&
-                        pb_x[3] + BULLET_W > mA2_x &&
-                        pb_x[3] < mA2_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[3] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][1] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][2] &&
-                        pb_x[3] + BULLET_W > mA3_x &&
-                        pb_x[3] < mA3_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[3] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][2] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][3] &&
-                        pb_x[3] + BULLET_W > mA4_x &&
-                        pb_x[3] < mA4_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[3] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][3] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][4] &&
-                        pb_x[3] + BULLET_W > mA5_x &&
-                        pb_x[3] < mA5_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[3] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][4] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][5] &&
-                        pb_x[3] + BULLET_W > mA6_x &&
-                        pb_x[3] < mA6_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[3] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][5] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][6] &&
-                        pb_x[3] + BULLET_W > mA7_x &&
-                        pb_x[3] < mA7_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[3] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][6] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[1][7] &&
-                        pb_x[3] + BULLET_W > mA8_x &&
-                        pb_x[3] < mA8_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y1 &&
-                        pb_y[3] < MEDIUM_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[1][7] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    ////
-                    if (aliens_alive[2][0] &&
-                        pb_x[3] + BULLET_W > mB1_x &&
-                        pb_x[3] < mB1_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[3] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][0] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][1] &&
-                        pb_x[3] + BULLET_W > mB2_x &&
-                        pb_x[3] < mB2_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[3] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][1] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][2] &&
-                        pb_x[3] + BULLET_W > mB3_x &&
-                        pb_x[3] < mB3_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[3] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][2] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][3] &&
-                        pb_x[3] + BULLET_W > mB4_x &&
-                        pb_x[3] < mB4_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[3] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][3] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][4] &&
-                        pb_x[3] + BULLET_W > mB5_x &&
-                        pb_x[3] < mB5_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[3] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][4] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][5] &&
-                        pb_x[3] + BULLET_W > mB6_x &&
-                        pb_x[3] < mB6_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[3] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][5] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][6] &&
-                        pb_x[3] + BULLET_W > mB7_x &&
-                        pb_x[3] < mB7_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[3] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][6] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
-                    if (aliens_alive[2][7] &&
-                        pb_x[3] + BULLET_W > mB8_x &&
-                        pb_x[3] < mB8_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > MEDIUM_Y2 &&
-                        pb_y[3] < MEDIUM_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[2][7] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 20;
-                    end
-
                 
-                    ////
-                    if (aliens_alive[3][0] &&
-                        pb_x[3] + BULLET_W > lA1_x &&
-                        pb_x[3] < lA1_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][0] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][1] &&
-                        pb_x[3] + BULLET_W > lA2_x &&
-                        pb_x[3] < lA2_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][1] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][2] &&
-                        pb_x[3] + BULLET_W > lA3_x &&
-                        pb_x[3] < lA3_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][2] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][3] &&
-                        pb_x[3] + BULLET_W > lA4_x &&
-                        pb_x[3] < lA4_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][3] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][4] &&
-                        pb_x[3] + BULLET_W > lA5_x &&
-                        pb_x[3] < lA5_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][4] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][5] &&
-                        pb_x[3] + BULLET_W > lA6_x &&
-                        pb_x[3] < lA6_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][5] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][6] &&
-                        pb_x[3] + BULLET_W > lA7_x &&
-                        pb_x[3] < lA7_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][6] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[3][7] &&
-                        pb_x[3] + BULLET_W > lA8_x &&
-                        pb_x[3] < lA8_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[3][7] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                     ////
-                    if (aliens_alive[4][0] &&
-                        pb_x[3] + BULLET_W > lA1_x &&
-                        pb_x[3] < lA1_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y1 &&
-                        pb_y[3] < LARGE_Y1 + MEDIUM_SIZE) begin
-                            aliens_alive[4][0] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][1] &&
-                        pb_x[3] + BULLET_W > lB2_x &&
-                        pb_x[3] < lB2_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y2 &&
-                        pb_y[3] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][1] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][2] &&
-                        pb_x[3] + BULLET_W > lB3_x &&
-                        pb_x[3] < lB3_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y2 &&
-                        pb_y[3] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][2] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][3] &&
-                        pb_x[3] + BULLET_W > lB4_x &&
-                        pb_x[3] < lB4_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y2 &&
-                        pb_y[3] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][3] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][4] &&
-                        pb_x[3] + BULLET_W > lB5_x &&
-                        pb_x[3] < lB5_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y2 &&
-                        pb_y[3] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][4] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][5] &&
-                        pb_x[3] + BULLET_W > lB6_x &&
-                        pb_x[3] < lB6_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y2 &&
-                        pb_y[3] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][5] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][6] &&
-                        pb_x[3] + BULLET_W > lB7_x &&
-                        pb_x[3] < lB7_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y2 &&
-                        pb_y[3] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][6] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-
-                    if (aliens_alive[4][7] &&
-                        pb_x[3] + BULLET_W > lB8_x &&
-                        pb_x[3] < lB8_x + MEDIUM_SIZE &&
-                        pb_y[3] + BULLET_H > LARGE_Y2 &&
-                        pb_y[3] < LARGE_Y2 + MEDIUM_SIZE) begin
-                            aliens_alive[4][7] <= 0;
-                            pb_active[3] <= 0;
-                            score <= score + 10;
-                    end
-                    // Continue similarly for all aliens [0][2] to [4][7]
-
-                    // Player Bullet 1 vs. Barriers
-                    // Barrier 0
-                    if (barrier_health[0] > 0 &&
-                        pb_x[3] + BULLET_W > b1_xpos &&
-                        pb_x[3] < b1_xpos + BARRIER_WIDTH &&
-                        pb_y[3] + BULLET_H > BARRIER_Y &&
-                        pb_y[3] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[0] <= barrier_health[0] - 1;
-                            pb_active[3] <= 0;
-                    end
-
-                    // Barrier 1
-                    if (barrier_health[1] > 0 &&
-                        pb_x[3] + BULLET_W > b2_xpos &&
-                        pb_x[3] < b2_xpos + BARRIER_WIDTH &&
-                        pb_y[3] + BULLET_H > BARRIER_Y &&
-                        pb_y[3] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[1] <= barrier_health[1] - 1;
-                            pb_active[3] <= 0;
-                    end
-
-                    // Barrier 2
-                    if (barrier_health[2] > 0 &&
-                        pb_x[3] + BULLET_W > b3_xpos &&
-                        pb_x[3] < b3_xpos + BARRIER_WIDTH &&
-                        pb_y[3] + BULLET_H > BARRIER_Y &&
-                        pb_y[3] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[2] <= barrier_health[2] - 1;
-                            pb_active[3] <= 0;
-                    end
-
-                    // Barrier 3
-                    if (barrier_health[3] > 0 &&
-                        pb_x[3] + BULLET_W > b4_xpos &&
-                        pb_x[3] < b4_xpos + BARRIER_WIDTH &&
-                        pb_y[3] + BULLET_H > BARRIER_Y &&
-                        pb_y[3] < BARRIER_Y + BARRIER_HEIGHT) begin
-                            barrier_health[3] <= barrier_health[3] - 1;
-                            pb_active[3] <= 0;
-                    end
       end
     end
 
@@ -2752,7 +1314,7 @@ module tt_um_space_invaders_game  (
       game_won <= 0;
     end
   end
-end
+
 
 
 
@@ -2769,24 +1331,13 @@ end
 
 
     // Draw them (2×6). We'll do 4 separate signals, then combine them.
-    wire bullet0_on = pb_active[0] &&
-                      (pix_x >= pb_x[0]) && (pix_x < pb_x[0] + 2) &&
-                      (pix_y >= pb_y[0]) && (pix_y < pb_y[0] + 6);
+    wire bullet0_on = pb_active &&
+                      (pix_x >= pb_x) && (pix_x < pb_x + 2) &&
+                      (pix_y >= pb_y) && (pix_y < pb_y + 6);
 
-    wire bullet1_on = pb_active[1] &&
-                      (pix_x >= pb_x[1]) && (pix_x < pb_x[1] + 2) &&
-                      (pix_y >= pb_y[1]) && (pix_y < pb_y[1] + 6);
-
-    wire bullet2_on = pb_active[2] &&
-                      (pix_x >= pb_x[2]) && (pix_x < pb_x[2] + 2) &&
-                      (pix_y >= pb_y[2]) && (pix_y < pb_y[2] + 6);
-
-    wire bullet3_on = pb_active[3] &&
-                      (pix_x >= pb_x[3]) && (pix_x < pb_x[3] + 2) &&
-                      (pix_y >= pb_y[3]) && (pix_y < pb_y[3] + 6);
-
+    
     // Combined “player bullet on” signal if ANY bullet is on at pixel
-    wire bullet_on = (bullet0_on || bullet1_on || bullet2_on || bullet3_on);
+    wire bullet_on = (bullet0_on);
 
     
     //-----------------------------------
@@ -2805,15 +1356,15 @@ end
     //----------------------------------------------------
     // 14) Final Color Priority with Collision Effects
     //----------------------------------------------------
-    wire [5:0] color_small   = 6'b111111; 
-    wire [5:0] color_medium  = 6'b111111; 
-    wire [5:0] color_large   = 6'b111111; 
+    wire [5:0] color_small   = 6'b001100;  
+    wire [5:0] color_medium  = 6'b110011;  
+    wire [5:0] color_large   = 6'b111100;  
     wire [5:0] color_shooter = 6'b011101; 
     wire [5:0] color_barrier = 6'b011101; 
     wire [5:0] color_bullet  = 6'b111111; 
     wire [5:0] color_alien_bullet = 6'b110000; 
     wire [5:0] color_trophy = 6'b101001;
-    wire [5:0] color_heart = 6'b110010;
+    wire [5:0] color_heart = 6'b110000;
     wire [5:0] color_score  = 6'b111111;
 
     always @(posedge clk) begin
