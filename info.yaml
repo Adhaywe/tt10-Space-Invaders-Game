@@ -39,9 +39,9 @@ project:
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: "input 1"
-  ui[1]: "input 2"
-  ui[2]: ""
+  ui[0]: "input 1"  # move right
+  ui[1]: "input 2"  # move left
+  ui[2]: "input 3"  # shoot
   ui[3]: ""
   ui[4]: ""
   ui[5]: ""
