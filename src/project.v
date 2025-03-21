@@ -56,33 +56,39 @@ module tt_um_space_invaders_game  (
     localparam [9:0] MEDIUM_Y2  = 210; 
     localparam [9:0] LARGE_Y1   = 240;  
     localparam [9:0] LARGE_Y2   = 270;  
+    localparam ALIEN_WIDTH      = (SMALL_SIZE + ALIEN_SPACING)*NUM_ALIENS;
 
     reg [9:0] group_x;
-    reg       move_dir;    // 1 => move right, 0 => move left
+    reg       move_dir;   // 1 => moving right, 0 => moving left
     reg [9:0] prev_vpos;
 
+    // On reset, start them at MIN_LEFT, going right
     always @(posedge clk) begin
         if (~rst_n) begin
-            group_x   <= 100;
-            move_dir  <= 1;   
-            prev_vpos <= 0;
+        group_x   <= MIN_LEFT;
+        move_dir  <= 1;   // start moving right
+        prev_vpos <= 0;
         end else begin
-            // Once per frame
-            prev_vpos <= pix_y;
-            if (pix_y == 0 && prev_vpos != 0) begin
-                // Move entire group horizontally
-                if (move_dir) group_x <= group_x + 1;
-                else          group_x <= group_x - 1;
-
-                // Bounce at boundaries
-                if (group_x <= MIN_LEFT && !move_dir)
-                    move_dir <= 1;
-                else if ((group_x + (SMALL_SIZE+ALIEN_SPACING)*(NUM_ALIENS-1)
-                          + SMALL_SIZE) >= MAX_RIGHT && move_dir)
-                    move_dir <= 0;
-            end
+        // Save old vertical position for once-per-frame trigger
+        prev_vpos <= pix_y;
+        
+        // Once per frame => if we detect transition (pix_y == 0 && prev_vpos != 0)
+        if (pix_y == 0 && prev_vpos != 0) begin
+            // Move the group by 1 pixel per frame
+            if (move_dir) 
+                group_x <= group_x + 1;
+            else          
+                group_x <= group_x - 1;
+            
+            // If the group's right edge >= MAX_RIGHT, go left
+            if ((group_x + ALIEN_WIDTH) >= MAX_RIGHT)
+                move_dir <= 0;
+            // If the group's left edge <= MIN_LEFT, go right
+            else if (group_x <= MIN_LEFT)
+                move_dir <= 1;
         end
     end
+end
 
     //----------------------------------------------------
     // 3) Data Structures for Collision Detection
