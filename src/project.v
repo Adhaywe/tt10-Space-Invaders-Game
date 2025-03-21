@@ -47,8 +47,8 @@ module tt_um_space_invaders_game  (
     localparam MEDIUM_SIZE   = 16;  
     localparam ALIEN_SPACING = 15;
     localparam NUM_ALIENS    = 8;   
-    localparam MIN_LEFT      = 80;
-    localparam MAX_RIGHT     = 450;
+    localparam MIN_LEFT      = 40;
+    localparam MAX_RIGHT     = 520;
 
     // Positions for each row
     localparam [9:0] SMALL_Y    = 150; 
@@ -71,8 +71,8 @@ module tt_um_space_invaders_game  (
             prev_vpos <= pix_y;
             if (pix_y == 0 && prev_vpos != 0) begin
                 // Move entire group horizontally
-                if (move_dir) group_x <= group_x + 2;
-                else          group_x <= group_x - 2;
+                if (move_dir) group_x <= group_x + 1;
+                else          group_x <= group_x - 1;
 
                 // Bounce at boundaries
                 if (group_x <= MIN_LEFT && !move_dir)
