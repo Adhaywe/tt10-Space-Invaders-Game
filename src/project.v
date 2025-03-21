@@ -533,7 +533,7 @@ module tt_um_space_invaders_game  (
 
 
     
-    // We move them once per frame (like your old code).
+    // We move them once per frame 
     always @(posedge clk) begin
       if (~rst_n) begin
         pb_active <= 0;
