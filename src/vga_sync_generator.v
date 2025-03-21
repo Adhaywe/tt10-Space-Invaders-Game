@@ -1,6 +1,5 @@
-
 module vga_sync_generator (
-    input  wire clk,       // ~31.5MHz pixel clock input
+    input  wire clk,
     input  wire reset,
     output reg  hsync,
     output reg  vsync,
@@ -8,42 +7,31 @@ module vga_sync_generator (
     output reg  [9:0] hpos,
     output reg  [9:0] vpos
 );
-
-    // For 640×480@72 Hz
     parameter H_DISPLAY = 640;
-    parameter H_FRONT   = 24;   // Horizontal front porch
-    parameter H_SYNC    = 40;   // Hsync pulse
-    parameter H_BACK    = 128;  // Horizontal back porch
-
+    parameter H_BACK    = 48;
+    parameter H_FRONT   = 16;
+    parameter H_SYNC    = 96;
     parameter V_DISPLAY = 480;
-    parameter V_BOTTOM  = 9;    // Vertical front porch
-    parameter V_SYNC    = 3;    // Vsync pulse
-    parameter V_TOP     = 28;    // Vertical back porch
+    parameter V_TOP     = 33;
+    parameter V_BOTTOM  = 10;
+    parameter V_SYNC    = 2;
 
-
-    // Calculate the horizontal and vertical totals.
     localparam H_SYNC_START = H_DISPLAY + H_FRONT;
     localparam H_SYNC_END   = H_DISPLAY + H_FRONT + H_SYNC - 1;
-    localparam H_MAX        = H_DISPLAY + H_FRONT + H_SYNC + H_BACK - 1;
-
+    localparam H_MAX        = H_DISPLAY + H_BACK + H_FRONT + H_SYNC - 1;
     localparam V_SYNC_START = V_DISPLAY + V_BOTTOM;
     localparam V_SYNC_END   = V_DISPLAY + V_BOTTOM + V_SYNC - 1;
-    localparam V_MAX        = V_DISPLAY + V_BOTTOM + V_SYNC + V_TOP - 1;
+    localparam V_MAX        = V_DISPLAY + V_TOP + V_BOTTOM + V_SYNC - 1;
 
-    // Track when we hit the end of a line (horizontal)
     wire hmaxxed = (hpos == H_MAX) || reset;
-    // Track when we hit the end of a frame (vertical)
     wire vmaxxed = (vpos == V_MAX) || reset;
 
-    //----------------------------------
-    // Horizontal position and sync
-    //----------------------------------
     always @(posedge clk) begin
         if (reset) begin
             hpos  <= 0;
             hsync <= 0;
         end else begin
-            if (hmaxxed)
+            if (hmaxxed) 
                 hpos <= 0;
             else
                 hpos <= hpos + 1;
@@ -52,9 +40,6 @@ module vga_sync_generator (
         end
     end
 
-    //----------------------------------
-    // Vertical position and sync
-    //----------------------------------
     always @(posedge clk) begin
         if (reset) begin
             vpos  <= 0;
@@ -70,6 +55,4 @@ module vga_sync_generator (
     end
 
     assign display_on = (hpos < H_DISPLAY) && (vpos < V_DISPLAY);
-
 endmodule
-
