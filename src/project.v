@@ -1384,14 +1384,15 @@ end
         G <= 0;
         B <= 0;
 
-        if (video_active) begin
-            R <= 2'b11;
-            G <= 2'b00;
-            B <= 2'b00;
+       if (video_active) begin
+        // Let's create a “moving vertical bar,” e.g. 32px wide
+        // that moves across the screen based on group_x.
+        if ((pix_x >= group_x) && (pix_x < group_x+32))
+            {R, G, B} <= 6'b111111; // white bar
+        else
+            {R, G, B} <= 6'b000001; // mostly black with a tiny bit of blue
         end else begin
-            R <= 0;
-            G <= 0;
-            B <= 0;
+            {R, G, B} <= 6'b000000; // black
         end
       end
     end
