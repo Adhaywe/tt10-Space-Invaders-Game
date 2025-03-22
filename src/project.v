@@ -76,9 +76,9 @@ module tt_um_space_invaders_game  (
         if (pix_y == 0 && prev_vpos != pix_y) begin
             // Move the group by x pixel per frame
             if (move_dir) 
-                group_x <= group_x + 5;
+                group_x <= group_x + 25;
             else          
-                group_x <= group_x - 5;
+                group_x <= group_x - 25;
             
             // If the group's right edge >= MAX_RIGHT, go left
             if ((group_x + ALIEN_WIDTH) >= MAX_RIGHT)
@@ -1436,11 +1436,6 @@ end
             G <= color_small[3:2];
             B <= color_small[1:0];
           end
-          else begin //debug
-            R <= pix_x[5:4] ^ group_x[1:0];
-            G <= pix_x[3:2];
-            B <= pix_x[1:0];
-end
         end
       end
     end
