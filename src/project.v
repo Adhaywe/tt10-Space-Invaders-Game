@@ -1385,57 +1385,13 @@ end
         B <= 0;
 
         if (video_active) begin
-          // Priority: alien bullet > player bullets > shooter > barrier > large > medium > small
-          if (pixel_on_score) begin
-            R <= color_score[5:4];
-            G <= color_score[3:2];
-            B <= color_score[1:0];
-          end
-          else if (pixel_on_trophy) begin
-            R <= color_trophy[5:4];
-            G <= color_trophy[3:2];
-            B <= color_trophy[1:0];
-          end
-          else if (pixel_on_heart) begin
-            R <= color_heart[5:4];
-            G <= color_heart[3:2];
-            B <= color_heart[1:0];
-          end
-          else if (abullet_on) begin
-            R <= color_alien_bullet[5:4];
-            G <= color_alien_bullet[3:2];
-            B <= color_alien_bullet[1:0];
-          end
-          else if (bullet_on) begin
-            R <= color_bullet[5:4];
-            G <= color_bullet[3:2];
-            B <= color_bullet[1:0];
-          end
-          else if (shooter_on) begin
-            R <= color_shooter[5:4];
-            G <= color_shooter[3:2];
-            B <= color_shooter[1:0];
-          end
-          else if (any_barrier_on) begin
-            R <= color_barrier[5:4];
-            G <= color_barrier[3:2];
-            B <= color_barrier[1:0];
-          end
-          else if (any_large_on) begin
-            R <= color_large[5:4];
-            G <= color_large[3:2];
-            B <= color_large[1:0];
-          end
-          else if (any_medium_on) begin
-            R <= color_medium[5:4];
-            G <= color_medium[3:2];
-            B <= color_medium[1:0];
-          end
-          else if (any_small_on) begin
-            R <= color_small[5:4];
-            G <= color_small[3:2];
-            B <= color_small[1:0];
-          end
+            R <= 2'b11;
+            G <= 2'b00;
+            B <= 2'b00;
+        end else begin
+            R <= 0;
+            G <= 0;
+            B <= 0;
         end
       end
     end
