@@ -64,17 +64,9 @@ module tt_um_space_invaders_game  (
 
     // On reset, start them at MIN_LEFT, going right
     always @(posedge clk) begin
-        if (~rst_n) begin
-        group_x   <= MIN_LEFT;
-        move_dir  <= 1;   // start moving right
-        prev_vpos <= 0;
-        end else begin
-        // Save old vertical position for once-per-frame trigger
-        prev_vpos <= pix_y;
       
         group_x <= group_x + 5;
            
-    end
 end
 
     //----------------------------------------------------
