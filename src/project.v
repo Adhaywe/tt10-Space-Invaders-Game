@@ -78,7 +78,7 @@ module tt_um_space_invaders_game  (
                 // Bounce at boundaries
                 if (group_x <= MIN_LEFT && !move_dir)
                     move_dir <= 1;
-                else if (group_x >= (MAX_RIGHT - 60) && move_dir)
+                else if (group_x >= (MAX_RIGHT - 90) && move_dir)
                     move_dir <= 0;
             end
         end
@@ -762,7 +762,7 @@ module tt_um_space_invaders_game  (
           // Alien Bullet Movement
           if (abullet_active) begin
               if (abullet_y < 390)
-                  abullet_y <= abullet_y + 10; 
+                  abullet_y <= abullet_y + 6; 
               else 
                  abullet_active <= 0;
 
