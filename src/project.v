@@ -59,7 +59,7 @@ module tt_um_space_invaders_game  (
     localparam ALIEN_WIDTH      = (SMALL_SIZE + ALIEN_SPACING)*NUM_ALIENS;
 
     reg [9:0] group_x;
-    reg       move_dir;   // 1 => moving right, 0 => moving left
+    reg       move_dir = 1;   // 1 => moving right, 0 => moving left
     reg [9:0] prev_vpos;
 
     always @(posedge clk) begin
@@ -70,23 +70,25 @@ module tt_um_space_invaders_game  (
     end else begin
         prev_vpos <= pix_y;
         
+        if (pix_y == 0 && prev_vpos != 0) begin
+                
+                if (move_dir) group_x <= group_x + 2;
+                else          group_x <= group_x - 2;
+
+                // Bounce at boundaries
+                if (group_x <= MIN_LEFT && !move_dir)
+                    move_dir <= 1;
+                else if (group_x >= MAX_RIGHT && move_dir)
+                    move_dir <= 0;
+            end
+        end
+    end
+        
         //if (pix_y == 0 && prev_vpos != 0) begin
           
           //      group_x <= group_x + 2;
           
-        if (pix_y == 0 && prev_vpos != 0) begin
-            group_x <= group_x + 2;
-            if (!move_dir)        
-                group_x <= group_x - 2;
-
-            if (group_x <= MIN_LEFT && !move_dir)
-                    move_dir <= 1;
-            else if (group_x >= MAX_RIGHT && move_dir)
-                    move_dir <= 0;
-        end
-    end
-end
-
+        
 
     //----------------------------------------------------
     // 3) Data Structures for Collision Detection
