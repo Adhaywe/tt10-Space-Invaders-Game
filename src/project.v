@@ -70,7 +70,7 @@ module tt_um_space_invaders_game  (
     end else begin
         prev_vpos <= pix_y;
         // If we just wrapped from the last active line (e.g. 479) back to 0
-        if (pix_y == 0 && prev_vpos == 479) begin
+        if (pix_y == 0 && prev_vpos != 0) begin
             // move the bar 1 or 2 pixels per frame, e.g.:
             if (move_dir) 
                 group_x <= group_x + 2;
