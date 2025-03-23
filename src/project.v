@@ -71,18 +71,9 @@ module tt_um_space_invaders_game  (
         prev_vpos <= pix_y;
         // If we just wrapped from the last active line (e.g. 479) back to 0
         if (pix_y == 0 && prev_vpos != 0) begin
-            // move the bar 1 or 2 pixels per frame, e.g.:
-            if (move_dir) 
+          
                 group_x <= group_x + 2;
-            else          
-                group_x <= group_x - 2;
-            // bounce logic
-            // Bounce at boundaries
-            if (group_x <= MIN_LEFT && !move_dir)
-                    move_dir <= 1;
-            else if ((group_x + (SMALL_SIZE+ALIEN_SPACING)*(NUM_ALIENS-1)
-                          + SMALL_SIZE) >= MAX_RIGHT && move_dir)
-                    move_dir <= 0;
+          
         end
     end
 end
