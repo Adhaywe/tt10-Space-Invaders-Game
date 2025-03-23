@@ -1384,15 +1384,58 @@ module tt_um_space_invaders_game  (
         G <= 0;
         B <= 0;
 
-       if (video_active) begin
-        // Let's create a “moving vertical bar,” e.g. 32px wide
-        // that moves across the screen based on group_x.
-        if ((pix_x >= group_x) && (pix_x < group_x+32))
-            {R, G, B} <= 6'b111111; // white bar
-        else
-            {R, G, B} <= 6'b000001; // mostly black with a tiny bit of blue
-        end else begin
-            {R, G, B} <= 6'b000000; // black
+        if (video_active) begin
+          // Priority: alien bullet > player bullets > shooter > barrier > large > medium > small
+          if (pixel_on_score) begin
+            R <= color_score[5:4];
+            G <= color_score[3:2];
+            B <= color_score[1:0];
+          end
+          else if (pixel_on_trophy) begin
+            R <= color_trophy[5:4];
+            G <= color_trophy[3:2];
+            B <= color_trophy[1:0];
+          end
+          else if (pixel_on_heart) begin
+            R <= color_heart[5:4];
+            G <= color_heart[3:2];
+            B <= color_heart[1:0];
+          end
+          else if (abullet_on) begin
+            R <= color_alien_bullet[5:4];
+            G <= color_alien_bullet[3:2];
+            B <= color_alien_bullet[1:0];
+          end
+          else if (bullet_on) begin
+            R <= color_bullet[5:4];
+            G <= color_bullet[3:2];
+            B <= color_bullet[1:0];
+          end
+          else if (shooter_on) begin
+            R <= color_shooter[5:4];
+            G <= color_shooter[3:2];
+            B <= color_shooter[1:0];
+          end
+          else if (any_barrier_on) begin
+            R <= color_barrier[5:4];
+            G <= color_barrier[3:2];
+            B <= color_barrier[1:0];
+          end
+          else if (any_large_on) begin
+            R <= color_large[5:4];
+            G <= color_large[3:2];
+            B <= color_large[1:0];
+          end
+          else if (any_medium_on) begin
+            R <= color_medium[5:4];
+            G <= color_medium[3:2];
+            B <= color_medium[1:0];
+          end
+          else if (any_small_on) begin
+            R <= color_small[5:4];
+            G <= color_small[3:2];
+            B <= color_small[1:0];
+          end
         end
       end
     end
