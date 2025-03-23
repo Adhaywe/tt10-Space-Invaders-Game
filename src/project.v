@@ -72,13 +72,13 @@ module tt_um_space_invaders_game  (
         
         if (pix_y == 0 && prev_vpos != 0) begin
                 
-                if (move_dir) group_x <= group_x + 2;
-                else          group_x <= group_x - 2;
+                if (move_dir) group_x <= group_x + 1;
+                else          group_x <= group_x - 1;
 
                 // Bounce at boundaries
                 if (group_x <= MIN_LEFT && !move_dir)
                     move_dir <= 1;
-                else if (group_x >= MAX_RIGHT && move_dir)
+                else if (group_x >= (MAX_RIGHT - 60) && move_dir)
                     move_dir <= 0;
             end
         end
@@ -446,8 +446,8 @@ module tt_um_space_invaders_game  (
             prev_vpos_shooter <= pix_y;
             if (pix_y == 0 && prev_vpos_shooter != 0) begin
                 case (movement_dir)
-                  DIR_LEFT:  if (shooter_x >= 20) shooter_x <= shooter_x - 10;
-                  DIR_RIGHT: if (shooter_x <= 500) shooter_x <= shooter_x + 10;
+                  DIR_LEFT:  if (shooter_x >= 20) shooter_x <= shooter_x - 6;
+                  DIR_RIGHT: if (shooter_x <= 500) shooter_x <= shooter_x + 6;
                   default:   /* idle */ ;
                 endcase
             end
@@ -539,7 +539,7 @@ module tt_um_space_invaders_game  (
 
 
     
-    // We move them once per frame (like your old code).
+    // We move them once per frame 
     always @(posedge clk) begin
       if (~rst_n) begin
         pb_active <= 0;
