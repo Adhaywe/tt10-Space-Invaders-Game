@@ -1255,7 +1255,6 @@ module tt_um_space_invaders_game  (
                     // Repeat similar blocks for aliens_alive[1][1] to aliens_alive[4][7]
                     // Player Bullet 0 vs. Barriers
                     // Barrier 0
-                    
                     if (barrier_health[0] > 0 &&
                         pb_x + BULLET_W > b1_xpos &&
                         pb_x < b1_xpos + BARRIER_WIDTH &&
