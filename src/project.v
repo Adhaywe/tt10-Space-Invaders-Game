@@ -1295,14 +1295,7 @@ module tt_um_space_invaders_game  (
                             barrier_health[3] <= barrier_health[3] - 1;
                             pb_active <= 0;
                     end
-                end
-            
-        
-    
-
-  
-            
-                
+                end        
       end
     end
 
@@ -1313,9 +1306,6 @@ module tt_um_space_invaders_game  (
       game_won <= 0;
     end
   end
-
-
-
 
 
 
