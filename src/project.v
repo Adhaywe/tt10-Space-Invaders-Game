@@ -1252,8 +1252,6 @@ module tt_um_space_invaders_game  (
                             score <= score + 10;
                     end
 
-                    
-
                     // Repeat similar blocks for aliens_alive[1][1] to aliens_alive[4][7]
                     // Player Bullet 0 vs. Barriers
                     // Barrier 0
