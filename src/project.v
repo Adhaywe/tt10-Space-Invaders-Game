@@ -344,9 +344,9 @@ module tt_um_space_invaders_game  (
 
 
   localparam TROPHY_X = 100; // 12 pixels padding
-  localparam TROPHY_Y = 80;                // Align Y position with scoreboard
+  localparam TROPHY_Y = 80;  // Align Y position with scoreboard
 
-  localparam HEART_X =  398;  // Position of the heart to the left of the score
+  localparam HEART_X =  398; // Position of the heart to the left of the score
   localparam HEART_Y = 86;  
 
   wire pixel_on_heart;
@@ -511,7 +511,6 @@ module tt_um_space_invaders_game  (
     wire lfsr_feedback = lfsr[7] ^ lfsr[5] ^ lfsr[4] ^ lfsr[3];
 
 
-    // Declare new signals to avoid naming conflicts
     reg [2:0] selectedRowRand;
     reg [2:0] colRand;
 
@@ -521,7 +520,7 @@ module tt_um_space_invaders_game  (
     wire [9:0] rowY_2 = MEDIUM_Y2 + 8;
     wire [9:0] rowY_3 = LARGE_Y1  + 8;
     wire [9:0] rowY_4 = LARGE_Y2  + 8;
-    localparam SHOOTER_WIDTH  = 16; // Adjust as per your shooter design
+    localparam SHOOTER_WIDTH  = 16; // Adjust as per shooter design
     localparam SHOOTER_HEIGHT = 16;
 
     // Barrier Bounding Box Parameters
@@ -533,7 +532,7 @@ module tt_um_space_invaders_game  (
 
 
     
-    // We move them once per frame 
+    // move them once per frame 
     always @(posedge clk) begin
       if (~rst_n) begin
         pb_active <= 0;
