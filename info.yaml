@@ -1,9 +1,9 @@
 # Tiny Tapeout project information
 project:
-  title:        "Space invader game"      # Project title
-  author:       "Adam, Lukas"      # Your name
+  title:        "Space Invaders ASIC"      # Project title
+  author:       "Lukas Krupp, Adam Gebregziabher"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "An HDL code for space invaders"      # One line description of what your project does
+  description:  "HDL implementation of the retro game Space Invaders"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     25000000       # Clock frequency in Hz (or 0 if not applicable)
 
@@ -39,9 +39,9 @@ project:
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: "input 1"  # move right
-  ui[1]: "input 2"  # move left
-  ui[2]: "input 3"  # shoot
+  ui[0]: "input1"  # move right
+  ui[1]: "input2"  # move left
+  ui[2]: "input3"  # shoot
   ui[3]: ""
   ui[4]: ""
   ui[5]: ""

@@ -3,18 +3,18 @@
 // Top-level module
 //---------------------------------------------
 module tt_um_space_invaders_game  (
-       input  wire [7:0] ui_in,
-    output wire [7:0] uo_out,
-    input  wire [7:0] uio_in,
-    output wire [7:0] uio_out,
-    output wire [7:0] uio_oe,
-    input  wire       ena,
-    input  wire       clk,
-    input  wire       rst_n
+        input  wire [7:0] ui_in,
+        output wire [7:0] uo_out,
+        input  wire [7:0] uio_in,
+        output wire [7:0] uio_out,
+        output wire [7:0] uio_oe,
+        input  wire       ena,
+        input  wire       clk,
+        input  wire       rst_n
 );
 
     //----------------------------------------------------
-    // 1) VGA Sync + signals
+    // VGA Sync + signals
     //----------------------------------------------------
     wire hsync, vsync, video_active;
     wire [9:0] pix_x, pix_y;
@@ -41,7 +41,7 @@ module tt_um_space_invaders_game  (
     );
 
     //----------------------------------------------------
-    // 2) Shared horizontal movement for Alien Group
+    // horizontal movement for Alien Group
     //----------------------------------------------------
     localparam SMALL_SIZE    = 16;  
     localparam MEDIUM_SIZE   = 16;  
@@ -70,11 +70,9 @@ module tt_um_space_invaders_game  (
             // Once per frame
             prev_vpos <= pix_y;
             if (pix_y == 0 && prev_vpos != 0) begin
-                // Move entire group horizontally
                 if (move_dir) group_x <= group_x + 2;
                 else          group_x <= group_x - 2;
 
-                // Bounce at boundaries
                 if (group_x <= MIN_LEFT && !move_dir)
                     move_dir <= 1;
                 else if ((group_x + (SMALL_SIZE+ALIEN_SPACING)*(NUM_ALIENS-1)
@@ -85,7 +83,7 @@ module tt_um_space_invaders_game  (
     end
 
     //----------------------------------------------------
-    // 3) Data Structures for Collision Detection
+    // Collision Detection
     //----------------------------------------------------
     
     localparam NUM_ALIENS_PER_ROW = 8;
@@ -97,7 +95,7 @@ module tt_um_space_invaders_game  (
 
 
     //----------------------------------------------------
-    // 4) Small Aliens (16×16) in one row
+    // Small Aliens (16×16) in one row
     //----------------------------------------------------
     wire s1_on, s2_on, s3_on, s4_on;
     wire s5_on, s6_on, s7_on, s8_on;
@@ -137,7 +135,7 @@ module tt_um_space_invaders_game  (
                           .pixel_on(s8_on));
 
     //----------------------------------------------------
-    // 5) Medium Aliens (16×16) in 2 rows
+    // Medium Aliens (16×16) in 2 rows
     //----------------------------------------------------
     wire mA1_on, mA2_on, mA3_on, mA4_on;
     wire mA5_on, mA6_on, mA7_on, mA8_on;
@@ -214,7 +212,7 @@ module tt_um_space_invaders_game  (
                            .pixel_on(mB8_on));
 
     //----------------------------------------------------
-    // 6) Large Aliens (16×16) in 2 rows
+    // Large Aliens (16×16) in 2 rows
     //----------------------------------------------------
     wire lA1_on, lA2_on, lA3_on, lA4_on;
     wire lA5_on, lA6_on, lA7_on, lA8_on;
@@ -291,7 +289,7 @@ module tt_um_space_invaders_game  (
                      .pixel_on(lB8_on));
 
     //----------------------------------------------------
-    // 7) Combine signals for small, medium, large aliens
+    // Combine signals for small, medium, large aliens
     //----------------------------------------------------
     wire any_small_on =
         (s1_on && aliens_alive[0][0] || 
@@ -343,10 +341,10 @@ module tt_um_space_invaders_game  (
   //-----------------------------------------
 
 
-  localparam TROPHY_X = 100; // 12 pixels padding
-  localparam TROPHY_Y = 80;  // Align Y position with scoreboard
+  localparam TROPHY_X = 100; 
+  localparam TROPHY_Y = 80;                
 
-  localparam HEART_X =  398; // Position of the heart to the left of the score
+  localparam HEART_X =  398;  
   localparam HEART_Y = 86;  
 
   wire pixel_on_heart;
@@ -379,7 +377,7 @@ module tt_um_space_invaders_game  (
 
 
     //----------------------------------------------------
-    // 8) Shooter Movement Direction
+    // Shooter Movement Direction
     //----------------------------------------------------
     localparam [1:0] DIR_IDLE  = 2'b00,
                      DIR_LEFT  = 2'b01,
@@ -414,7 +412,7 @@ module tt_um_space_invaders_game  (
     end
 
     //----------------------------------------------------
-    // 9) Shooter Position
+    // Shooter Position
     //----------------------------------------------------
     localparam SHOOTER_Y     = 360;  
 
@@ -449,7 +447,7 @@ module tt_um_space_invaders_game  (
     end
 
     //----------------------------------------------------
-    // 10) Draw the Shooter
+    // Draw the Shooter
     //----------------------------------------------------
     wire shooter_on;
     draw_shooter myShooter (
@@ -461,7 +459,7 @@ module tt_um_space_invaders_game  (
     );
 
     //----------------------------------------------------
-    // 11) Barriers (32×16 now)
+    // Barriers (32×16 now)
     //----------------------------------------------------
     wire b1_on, b2_on, b3_on, b4_on;
     localparam BARRIER_Y = 320; 
@@ -506,7 +504,6 @@ module tt_um_space_invaders_game  (
     reg abullet_active;
     reg [9:0]  abullet_x, abullet_y;
 
-    // Minimal LFSR for randomness
     reg [7:0] lfsr;
     wire lfsr_feedback = lfsr[7] ^ lfsr[5] ^ lfsr[4] ^ lfsr[3];
 
@@ -520,7 +517,7 @@ module tt_um_space_invaders_game  (
     wire [9:0] rowY_2 = MEDIUM_Y2 + 8;
     wire [9:0] rowY_3 = LARGE_Y1  + 8;
     wire [9:0] rowY_4 = LARGE_Y2  + 8;
-    localparam SHOOTER_WIDTH  = 16; // Adjust as per shooter design
+    localparam SHOOTER_WIDTH  = 16; 
     localparam SHOOTER_HEIGHT = 16;
 
     // Barrier Bounding Box Parameters
@@ -532,14 +529,13 @@ module tt_um_space_invaders_game  (
 
 
     
-    // move them once per frame 
     always @(posedge clk) begin
       if (~rst_n) begin
         pb_active <= 0;
         pb_x <= 0;  pb_y <= 0;
         
         prev_button2 <= 0;
-	      lfsr <= 8'hA5;
+	    lfsr <= 8'hA5;
         abullet_active <= 0;
         abullet_x <= 0;
         abullet_y <= 0;
@@ -926,7 +922,6 @@ module tt_um_space_invaders_game  (
                             score <= score + 30;
                     end
 
-                    // Similarly, check for Aliens in other rows (Medium and Large)
                     // Medium Row 1: Aliens [1][0] to [1][7] (mA1 to mA8)
                     if (aliens_alive[1][0] &&
                         pb_x + BULLET_W > mA1_x &&
@@ -1252,7 +1247,9 @@ module tt_um_space_invaders_game  (
                             score <= score + 10;
                     end
 
-                    // Repeat similar blocks for aliens_alive[1][1] to aliens_alive[4][7]
+                    
+
+                    // aliens_alive[1][1] to aliens_alive[4][7]
                     // Player Bullet 0 vs. Barriers
                     // Barrier 0
                     if (barrier_health[0] > 0 &&
@@ -1293,7 +1290,14 @@ module tt_um_space_invaders_game  (
                             barrier_health[3] <= barrier_health[3] - 1;
                             pb_active <= 0;
                     end
-                end        
+                end
+            
+        
+    
+
+  
+            
+                
       end
     end
 
@@ -1308,6 +1312,9 @@ module tt_um_space_invaders_game  (
 
 
 
+
+
+
 // draw alien bullet (2 wide x 6 tall, red)
     wire abullet_on;
     localparam BULLET_W = 2;
@@ -1317,7 +1324,7 @@ module tt_um_space_invaders_game  (
                         (pix_y >= abullet_y) && (pix_y < abullet_y + BULLET_H);
 
 
-    // Draw them (2×6). We'll do 4 separate signals, then combine them.
+    // Draw them (2×6), do 4 separate signals, then combine them.
     wire bullet0_on = pb_active &&
                       (pix_x >= pb_x) && (pix_x < pb_x + 2) &&
                       (pix_y >= pb_y) && (pix_y < pb_y + 6);
@@ -1330,14 +1337,13 @@ module tt_um_space_invaders_game  (
     //-----------------------------------
     wire pixel_on_score;
    draw_score draw_score_inst (
-        .pix_x(pix_x),                   // Current pixel's X coordinate
-        .pix_y(pix_y),                   // Current pixel's Y coordinate
-        .score(score),               // Player's current score
-        .shooter_lives(shooter_lives), // Shooter's current lives
-        .pixel_on(pixel_on_score)        // Output: Pixel part of score or health display
+        .pix_x(pix_x),                  
+        .pix_y(pix_y),                   
+        .score(score),               
+        .shooter_lives(shooter_lives), 
+        .pixel_on(pixel_on_score)       
     );
 
-    //----------------------------------
   
  
     //----------------------------------------------------
